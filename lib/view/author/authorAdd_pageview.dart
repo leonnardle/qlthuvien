@@ -1,0 +1,156 @@
+import 'package:flutter/material.dart';
+import 'package:luanvan/view/author/authorList_pageview.dart';
+import '../../model/author_model.dart';
+import '../../service/author_service.dart';
+
+class AddAuthor extends StatefulWidget {
+  @override
+  _AddAuthorState createState() => _AddAuthorState();
+}
+
+class _AddAuthorState extends State<AddAuthor> {
+  final _addAuthorKey = GlobalKey<FormState>();
+  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController();
+  final TextEditingController _storyController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  Image? _selectedImage;
+  bool _isLoading = false; // Biến để theo dõi trạng thái tải
+
+  Future<void> _pickImage() async {
+    final author = Author();
+    await author.pickImage();
+    setState(() {
+      _selectedImage = author.image;
+    });
+  }
+
+  Future<void> _saveAuthor() async {
+    if (_addAuthorKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true; // Bắt đầu tải
+      });
+
+      final author = Author()
+        ..id = _idController.text
+        ..name = _nameController.text
+        ..country = _countryController.text
+        ..story = _storyController.text
+        ..email = _emailController.text;
+      // Cập nhật ảnh cho tác giả
+      if (_selectedImage != null) {
+        author.image = _selectedImage;
+        author.imageBase64 = await author.getImageBase64();
+      }
+      await insertAuthor(author);
+
+      // Thực hiện tải danh sách tác giả mới trong nền
+      fetchAuthor().then((list) {
+        // Sử dụng context hiện tại trong setState để đảm bảo widget còn hoạt động
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ListAuthor(items: list),
+            ),
+          );
+        }
+      }).catchError((error) {
+        // Handle the error if any
+        setState(() {
+          _isLoading = false; // Kết thúc tải nếu có lỗi
+        });
+      });
+
+      setState(() {
+        _isLoading = false; // Kết thúc tải
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Thêm Tác Giả'),
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator()) // Hiển thị bộ nạp khi đang tải
+          : SingleChildScrollView(  // Sử dụng SingleChildScrollView
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _addAuthorKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _idController,
+                  decoration: InputDecoration(labelText: 'Mã Tác Giả'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Mã tác giả không được để trống';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: 'Tên Tác Giả'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Tên tác giả không được để trống';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: _countryController,
+                  decoration: InputDecoration(labelText: 'Quốc Tịch'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Quốc tịch không được để trống';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: _storyController,
+                  decoration: InputDecoration(labelText: 'Tiểu Sử'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Tiểu sử không được để trống';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(labelText: 'Email'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty || !value.contains('@')) {
+                      return 'Email không hợp lệ';
+                    }
+                    return null;
+                  },
+                ),
+                SizedBox(height: 16.0),
+                _selectedImage == null
+                    ? Text('Chưa chọn ảnh')
+                    : Image(image: _selectedImage!.image, width: 100, height: 100, fit: BoxFit.cover),
+                SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: _pickImage,
+                  child: Text('Chọn Ảnh'),
+                ),
+                SizedBox(height: 16.0),
+                TextButton(onPressed: _saveAuthor, child: const Text('Lưu'))
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
