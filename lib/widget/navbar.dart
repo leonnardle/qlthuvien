@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:luanvan/model/book_model.dart';
+import 'package:luanvan/model/publisher_model.dart';
 import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/model/booktype_model.dart';
 import 'package:luanvan/service/author_service.dart';
+import 'package:luanvan/service/book_service.dart';
 import 'package:luanvan/service/booktype_service.dart';
+import 'package:luanvan/service/publisher_service.dart';
 import 'package:luanvan/view/booktype/booktypeList_pageview.dart';
+
+import '../view/book/booklist_pageview.dart';
 
 
 class NavBar extends StatelessWidget {
@@ -30,8 +36,30 @@ class NavBar extends StatelessWidget {
           ),
           ListTile(
             title: Text('Quản Lý Thông Tin Sách'),
-            onTap: ()async {
-            },         ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => StreamBuilder<List<Book>>(
+                    stream: fetchBooks(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error:  ${snapshot.error}'));
+                      } else if (snapshot.hasData) {
+                        List<Book> list = snapshot.data!;
+                        return ListBook(items: list);
+                      } else {
+                        return ListBook();
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+
           ListTile(
             title: Text('Quản Lý Loại Sách'),
             onTap: () async {
@@ -52,6 +80,13 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text('Quản Lý Nhà Xuất Bản'),
             onTap: ()async {
+              List<Publisher> list=await fetchPublisher();
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/publisherlist',
+                    (route) => false,  // Xóa tất cả các routes trước đó
+                arguments: list,  // Truyền dữ liệu listBookType đến route mới
+              );
             },          ),
           ListTile(
             title: Text('Quản Lý Tác Giả'),

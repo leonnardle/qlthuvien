@@ -1,7 +1,5 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import '../widget/ImagePicker.dart';
 
@@ -83,7 +81,7 @@ class Author {
       _imageBase64 = await getImageBase64();
     }
   }
-
+  // convert no ra base64
   Future<String?> getImageBase64() async {
     final imagePickerHelper = ImagePickerHelper();
     if (_image != null) {

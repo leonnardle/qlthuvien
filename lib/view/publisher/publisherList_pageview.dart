@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:luanvan/view/publisher/publisherAdd_pageview.dart';
 
-import '../../model/booktype_model.dart';
-import '../../service/booktype_service.dart';
+import '../../model/publisher_model.dart';
+import '../../service/publisher_service.dart';
 import '../../widget/addButton.dart';
 import '../../widget/deleteDialog.dart';
 import '../../widget/navbar.dart';
-import 'booktypeAdd_pageview.dart';
+import 'booklistByPublisher_pageview.dart';
 
-class ListBookType extends StatefulWidget {
-  late List<BookType>? items;
 
-  ListBookType({super.key, this.items});
+class ListPublisher extends StatefulWidget {
+  late List<Publisher>? items;
 
-  _ListBookTypeState createState() => _ListBookTypeState();
+  ListPublisher({super.key, this.items});
+
+  _ListPublisherState createState() => _ListPublisherState();
 }
 
-class _ListBookTypeState extends State<ListBookType> {
+class _ListPublisherState extends State<ListPublisher> {
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class _ListBookTypeState extends State<ListBookType> {
             right: 0,
             child: Center(
               child: Text(
-                'Danh Sách Loại Sách',
+                'Danh Sách nhà xuất bản',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
@@ -44,13 +46,15 @@ class _ListBookTypeState extends State<ListBookType> {
           ),
           Positioned.fill(
             top: 50,
-            child: ListView.builder(
+            child:
+              ListView.builder(
               itemCount: widget.items?.length??0,
               itemBuilder: (context, index) {
-                BookType booktype = widget.items![index];
-                return GestureDetector(
+                Publisher publisher = widget.items![index];
+                   return GestureDetector(
+
                   child: Card(
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
@@ -60,22 +64,26 @@ class _ListBookTypeState extends State<ListBookType> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Loại Sách ${index + 1}',
+                                  'Nhà xuất bản ${index + 1}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
                                 ),
                                 SizedBox(height: 4),
-                                Text('mã loại : ${booktype.id}'),
+                                Text('mã nxb : ${publisher.id}'),
                                 SizedBox(height: 4),
-                                Text('tên loại : ${booktype.name}'),
+                                Text('tên nxb : ${publisher.name}'),
+                                SizedBox(height: 4),
+                                Text('địa chỉ : ${publisher.address}'),
+                                SizedBox(height: 4),
+                                Text('sdt : ${publisher.phonenumber}'),
                               ],
                             ),
                           ),
                           IconButton(
                             onPressed: () {
-                             _showEditDialog(context, booktype);
+                              _showEditDialog(context, publisher);
                             },
                             icon: Icon(Icons.edit),
                           ),
@@ -83,9 +91,8 @@ class _ListBookTypeState extends State<ListBookType> {
                             onPressed: () {
                               showDeleteConfirmationDialog(context, (confirm) async {
                                 if(confirm){
-                                  await deleteBooktype(widget.items![index]);
-                                  BookType? book = widget.items?[index];
-                                  if (book != null) {
+                                  bool response = await deletePublisher(widget.items![index]);
+                                  if (response) {
                                     setState(() {
                                       widget.items?.removeAt(index);
                                     });
@@ -100,6 +107,12 @@ class _ListBookTypeState extends State<ListBookType> {
                     ),
                   ),
                   onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PublisherBooksPage(publisher: publisher),
+                      ),
+                    );
 
                   },
                 );
@@ -114,7 +127,7 @@ class _ListBookTypeState extends State<ListBookType> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AddBookType(),
+                    builder: (context) => AddPublisher(),
                   ),
                 );
               },
@@ -124,21 +137,35 @@ class _ListBookTypeState extends State<ListBookType> {
       ),
     );
   }
-  void _showEditDialog(BuildContext context, BookType booktype) async{
-    final TextEditingController tenloaisachController = TextEditingController(text: booktype.name);
+  void _showEditDialog(BuildContext context, Publisher publisher) async {
+    late TextEditingController tennxbController = TextEditingController(text: publisher.name);
+    late TextEditingController diachiController = TextEditingController(text: publisher.address);
+    late TextEditingController sdtController = TextEditingController(text: publisher.phonenumber);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Chỉnh Sửa Loại Sách'),
+          title: Text('Chỉnh Sửa nxb'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: tenloaisachController,
+                controller: tennxbController,
                 decoration: InputDecoration(
-                  labelText: 'Tên Loại Sách',
+                  labelText: 'Tên nxb',
+                ),
+              ),
+              TextField(
+                controller: diachiController,
+                decoration: InputDecoration(
+                  labelText: 'Địa chỉ',
+                ),
+              ),
+              TextField(
+                controller: sdtController,
+                decoration: InputDecoration(
+                  labelText: 'Số điện thoại',
                 ),
               ),
             ],
@@ -152,16 +179,20 @@ class _ListBookTypeState extends State<ListBookType> {
             ),
             TextButton(
               onPressed: () async {
-                final newName = tenloaisachController.text;
+                final newName = tennxbController.text;
+                final newAddress = diachiController.text;
+                final newPhoneNumber = sdtController.text;
 
-                // Cập nhật tên loại sách
-                booktype.name=newName;
-                await updateBooktype(booktype);
+                // Cập nhật thông tin nhà xuất bản
+                publisher.name = newName;
+                publisher.address = newAddress;
+                publisher.phonenumber = newPhoneNumber;
+                await updatePublisher(publisher);
 
-                // Cập nhật danh sách loại sách
-                List<BookType> bookList = await fetchBookType();
+                // Cập nhật danh sách nhà xuất bản
+                List<Publisher> updatedPublishers = await fetchPublisher();
                 setState(() {
-                  widget.items = bookList;
+                  widget.items = updatedPublishers;
                 });
 
                 Navigator.of(context).pop();

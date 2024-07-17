@@ -1,8 +1,12 @@
+
+import 'book_model.dart';
+
 class Publisher{
   String _id = '';
   String _name = '';
   String _address = '';
   String _phonenumber = '';
+
 
   String get id => _id;
 
@@ -12,7 +16,7 @@ class Publisher{
 
   String get name => _name;
 
-  String get infomation => _phonenumber;
+  String get phonenumber => _phonenumber;
 
   set phonenumber(String value) {
     _phonenumber = value;
@@ -35,6 +39,7 @@ class Publisher{
     publisher.name = data['tennxb'] ?? '';
     publisher.address = data['diachi'] ?? '';
     publisher.phonenumber = data['sdt'] ?? '';
+
     return publisher;
   }
 

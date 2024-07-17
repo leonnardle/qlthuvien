@@ -1,14 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:luanvan/model/author_model.dart';
+import 'package:luanvan/model/publisher_model.dart';
 import 'package:luanvan/service/shared.dart';
 import 'package:luanvan/view/author/authorList_pageview.dart';
+import 'package:luanvan/view/book/booklist_pageview.dart';
 import 'package:luanvan/view/booktype/booktypeList_pageview.dart';
 import 'package:luanvan/view/home_pageview.dart';
 import 'package:luanvan/view/login_pageview.dart';
+import 'package:luanvan/view/publisher/publisherList_pageview.dart';
 import 'package:luanvan/view/register_pageview.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import 'model/book_model.dart';
 import 'model/booktype_model.dart';
 
 
@@ -61,7 +65,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => MyHomePage(name: "trung"),
         '/login': (context) => const LoginPage(),
         '/register': (context) => const RegisTerPage(),
-      '/booktypelist': (context) {
+        '/booktypelist': (context) {
         final list = ModalRoute.of(context)!.settings.arguments as List<BookType>?;
         return ListBookType(items: list ?? []);
       },
@@ -69,6 +73,11 @@ class MyApp extends StatelessWidget {
         final list = ModalRoute.of(context)!.settings.arguments as List<Author>?;
         return ListAuthor(items: list ?? []);
       },
+      '/publisherlist': (context) {
+        final list = ModalRoute.of(context)!.settings.arguments as List<Publisher>?;
+        return ListPublisher(items: list ?? list);
+      },
+
       },
     );
   }
