@@ -4,7 +4,6 @@ import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/model/publisher_model.dart';
 import 'package:luanvan/service/shared.dart';
 import 'package:luanvan/view/author/authorList_pageview.dart';
-import 'package:luanvan/view/book/booklist_pageview.dart';
 import 'package:luanvan/view/booktype/booktypeList_pageview.dart';
 import 'package:luanvan/view/home_pageview.dart';
 import 'package:luanvan/view/login_pageview.dart';
@@ -12,7 +11,6 @@ import 'package:luanvan/view/publisher/publisherList_pageview.dart';
 import 'package:luanvan/view/register_pageview.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-import 'model/book_model.dart';
 import 'model/booktype_model.dart';
 
 

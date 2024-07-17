@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:html';
 import 'package:http/http.dart' as http;
+import 'package:luanvan/model/booktype_model.dart';
 import 'package:luanvan/model/publisher_model.dart';
 import 'package:luanvan/service/publisher_service.dart';
 import '../config.dart';
@@ -16,9 +17,10 @@ Stream<List<Book>> fetchBooks() async* {
     if (response.statusCode == 200) {
       List<Book> books = parseBook(response.body);
 
-      // Fetch publishers for each book concurrently
+      // Fetch publishers and book types for each book concurrently
       final futures = books.map((book) async {
         try {
+          // Fetch publishers
           final publishersResponse = await http.get(Uri.parse('${ConFig.apiUrl}/sach/${book.id}/danhsachnxb'));
           if (publishersResponse.statusCode == 200) {
             final publishersData = jsonDecode(publishersResponse.body)['data'];
@@ -33,8 +35,21 @@ Stream<List<Book>> fetchBooks() async* {
             print('Failed to load publishers for book ${book.id}');
             book.publishersList = [];
           }
+
+          // Fetch book type
+          final bookTypeResponse = await http.get(Uri.parse('${ConFig.apiUrl}/sach/${book.id}/danhsachloaisach'));
+          if (bookTypeResponse.statusCode == 200) {
+            final bookTypeData = jsonDecode(bookTypeResponse.body)['data'];
+            if (bookTypeData != null&&bookTypeData is List) {
+              book.bookTypeList = bookTypeData.map((p) => BookType.fromJson(p)).toList();
+            } else {
+              print('Chưa có mã loại cho id: ${book.id}');
+            }
+          } else {
+            print('Failed to load book type for book ${book.id}');
+          }
         } catch (e) {
-          print('Error fetching publishers for book ${book.id}: $e');
+          print('Error fetching publishers or book type for book ${book.id}: $e');
           book.publishersList = [];
         }
       }).toList();
@@ -50,7 +65,6 @@ Stream<List<Book>> fetchBooks() async* {
     yield* Stream.error(e); // Ném lỗi ra Stream
   }
 }
-
 Future<void> insertBook(Book book) async {
   final response = await http.post(
     Uri.parse('http://192.168.1.17:3000/sach'),
@@ -60,7 +74,7 @@ Future<void> insertBook(Book book) async {
       'tensach': book.name,
       'matg': book.authorId,
       'manxbList': book.listPublisherIds,  // Gửi danh sách ID của nhà xuất bản
-      'maloai': book.bookTypeId,
+      'maloaiList': book.listBookTypeIds,
       'mota': book.description,
       'hinhanh': book.imageBase64,
       'soluong': book.quantity
@@ -75,8 +89,7 @@ Future<void> insertBook(Book book) async {
 }
 
 
-
-Future<void> updateBook(Book book, List<String> manxbList) async {
+Future<void> updateBook(Book book, List<String> manxbList,List<String> manloaiList) async {
   final response = await http.put(
     Uri.parse('http://192.168.1.17:3000/sach/${book.id}'),
     headers: {'Content-Type': 'application/json'},
@@ -85,7 +98,7 @@ Future<void> updateBook(Book book, List<String> manxbList) async {
       'tensach': book.name,
       'matg': book.authorId,
       'manxbList': manxbList,  // Gửi danh sách ID của nhà xuất bản
-      'maloai': book.bookTypeId,
+      'maloaiList': manloaiList,
       'mota': book.description,
       'hinhanh': book.imageBase64,
       'soluong': book.quantity
@@ -97,13 +110,15 @@ Future<void> updateBook(Book book, List<String> manxbList) async {
   }
 }
 
-Future<void> deleteBook(String id) async {
+Future<bool> deleteBook(String id) async {
   final response = await http.delete(
     Uri.parse('http://192.168.1.17:3000/sach/$id'),
   );
 
   if (response.statusCode != 200) {
     throw Exception('Không thể xóa sách');
+  }else{
+    return true;
   }
 }
 Future<List<Publisher>> fetchPublisherByBookId(String BookId) async {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:luanvan/model/booktype_model.dart';
+import 'package:luanvan/service/booktype_service.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:luanvan/model/book_model.dart';
 import 'package:luanvan/service/publisher_service.dart';
@@ -16,11 +18,12 @@ class _AddBookState extends State<AddBook> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _authorIdController = TextEditingController();
-  final TextEditingController _booktypeIdController = TextEditingController();
   final TextEditingController _describerController = TextEditingController();
   List<Publisher> _publishers = [];
   List<Publisher> _selectedPublishers = [];
 
+  List<BookType> _bookType = [];
+  List<BookType> _selectedBooktype = [];
   Image? _selectedImage;
   bool _isLoading = false; // Biến để theo dõi trạng thái tải
 
@@ -28,6 +31,7 @@ class _AddBookState extends State<AddBook> {
   void initState() {
     super.initState();
     _fetchPublishers();
+    _fetchBookType();
   }
 
   Future<void> _fetchPublishers() async {
@@ -35,6 +39,16 @@ class _AddBookState extends State<AddBook> {
       final publishers = await fetchPublisher();
       setState(() {
         _publishers = publishers;
+      });
+    } catch (error) {
+      print('Lỗi khi nạp danh sách nhà xuất bản: $error');
+    }
+  }
+  Future<void> _fetchBookType() async {
+    try {
+      final booktype = await fetchBookType();
+      setState(() {
+        _bookType = booktype;
       });
     } catch (error) {
       print('Lỗi khi nạp danh sách nhà xuất bản: $error');
@@ -65,13 +79,22 @@ class _AddBookState extends State<AddBook> {
         });
         return;
       }
+      if (_selectedBooktype.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vui lòng chọn ít nhất một ma loai')),
+        );
+        setState(() {
+          _isLoading = false; // Kết thúc tải
+        });
+        return;
+      }
 
       final book = Book()
         ..id = _idController.text
         ..name = _nameController.text
         ..listPublisherIds = _selectedPublishers.map((p) => p.id).toList() // Cập nhật danh sách nhà xuất bản
         ..authorId = _authorIdController.text
-        ..bookTypeId = _booktypeIdController.text
+        ..listBookTypeIds = _selectedBooktype.map((p)=>p.id).toList()
         ..description = _describerController.text;
 
       // Cập nhật ảnh cho sách
@@ -113,12 +136,40 @@ class _AddBookState extends State<AddBook> {
         context: context,
         builder: (context) {
           return MultiSelectDialog(
-            items: _publishers.map((p) => MultiSelectItem(p, p.name)).toList(),
+            items: _publishers.map((p) => MultiSelectItem(p, p.id)).toList(),
             initialValue: _selectedPublishers,
             title: Text('Chọn Nhà Xuất Bản'),
             onConfirm: (values) {
               setState(() {
                 _selectedPublishers = values;
+              });
+              Navigator.of(context).pop;  // Trả giá trị đã chọn về
+            },
+          );
+        },
+      );
+/*
+      if (selected != null) {
+        setState(() {
+          _selectedPublishers = selected;
+        });
+      }*/
+    } catch (error) {
+      print('Lỗi khi chọn nhà xuất bản: $error');
+    }
+  }
+  void _selectBookType() async {
+    try {
+      showDialog<List<BookType>>(
+        context: context,
+        builder: (context) {
+          return MultiSelectDialog(
+            items: _bookType.map((p) => MultiSelectItem(p, p.id)).toList(),
+            initialValue: _selectedBooktype,
+            title: Text('Chọn ma loai'),
+            onConfirm: (values) {
+              setState(() {
+                _selectedBooktype = values;
               });
               Navigator.of(context).pop;  // Trả giá trị đã chọn về
             },
@@ -186,22 +237,25 @@ class _AddBookState extends State<AddBook> {
                   ),
                 ),
                 SizedBox(height: 16.0),
+                GestureDetector(
+                  onTap: _selectBookType,
+                  child: InputDecorator(
+                    decoration: InputDecoration(
+                      labelText: 'Chọn ma loai',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(_selectedBooktype.isEmpty
+                        ? 'Chưa chọn ma loai'
+                        : _selectedBooktype.map((p) => p.id).join(', ')),
+                  ),
+                ),
+
                 TextFormField(
                   controller: _authorIdController,
                   decoration: InputDecoration(labelText: 'Mã Tác Giả'),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Mã tác giả không được để trống';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: _booktypeIdController,
-                  decoration: InputDecoration(labelText: 'Mã Loại Sách'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Mã loại sách không được để trống';
                     }
                     return null;
                   },

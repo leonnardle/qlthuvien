@@ -78,8 +78,8 @@ class _PublisherBooksPageState extends State<PublisherBooksPage> {
 
                               SizedBox(height: 4),
                               Text('Tên sách : ${book.name}'),
-                              SizedBox(height: 4),
-                              Text('mã loại : ${book.bookTypeId}'),
+                     /*         SizedBox(height: 4),
+                              Text('mã loại : ${book.bookTypeId}'),*/
                             ],
                           ),
                         ),

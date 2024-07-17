@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:luanvan/model/booktype_model.dart';
+import 'package:luanvan/service/booktype_service.dart';
 import 'package:luanvan/widget/deleteDialog.dart';
 import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
@@ -89,9 +91,9 @@ class _ListBookState extends State<ListBook> {
                                 SizedBox(height: 4),
                                 Text('Mã tác giả : ${book.authorId}'),
                                 SizedBox(height: 4),
-                                Text('Mã loại sách : ${book.bookTypeId}'),
+                                Text('Mã loại sách : ${book.bookTypeList.map((p) => p.id).join(', ')}'),
                                 SizedBox(height: 4),
-                                Text('Nhà xuất bản: ${book.publishersList.map((p) => p.name).join(', ')}'),  // Hiển thị tên nhà xuất bản
+                                Text('Nhà xuất bản: ${book.publishersList.map((p) => p.id).join(', ')}'),  // Hiển thị tên nhà xuất bản
                                 SizedBox(height: 4),
                                 Text('Mô tả : ${book.description}'),
                               ],
@@ -110,7 +112,7 @@ class _ListBookState extends State<ListBook> {
                             onPressed: () {
                               showDeleteConfirmationDialog(context, (confirmed) async {
                                 if (confirmed) {
-                                  await deleteBook(book.id);
+                                  bool check = await deleteBook(book.id);
                                   // Cập nhật lại dữ liệu khi xóa sách
                                   _refreshBooks();
                                 }
@@ -149,18 +151,31 @@ class _ListBookState extends State<ListBook> {
   Future<void> _showEditDialog(BuildContext context, Book book) async {
     final TextEditingController nameController = TextEditingController(text: book.name);
     final TextEditingController authorIdController = TextEditingController(text: book.authorId);
-    final TextEditingController bookTypeIdController = TextEditingController(text: book.bookTypeId);
     final TextEditingController descriptionController = TextEditingController(text: book.description);
     Image? selectedImage = book.image;
     bool isLoading = false;
     List<Publisher> _publishers = [];
     List<Publisher> _selectedPublishers = book.publishersList;
 
+    List<BookType> _bookType = [];
+    List<BookType> _selectedBooktype = book.bookTypeList;
+
     Future<void> _fetchPublishers() async {
       try {
         final publishers = await fetchPublisher();
         setState(() {
           _publishers = publishers;
+        });
+      } catch (error) {
+        print('Lỗi khi nạp danh sách nhà xuất bản: $error');
+      }
+    }
+
+    Future<void> _fetchBookTypes() async {
+      try {
+        final bookType = await fetchBookType();
+        setState(() {
+          _bookType = bookType;
         });
       } catch (error) {
         print('Lỗi khi nạp danh sách nhà xuất bản: $error');
@@ -195,8 +210,28 @@ class _ListBookState extends State<ListBook> {
         },
       );
     }
+    Future<void> _selecBookTypes(BuildContext dialogContext, StateSetter setState) async {
+      List<String> selectedBookTypes = _selectedBooktype.map((p) => p.id).toList();
+
+      await showDialog<List<BookType>>(
+        context: dialogContext,
+        builder: (context) {
+          return MultiSelectDialog(
+            items: _bookType.map((p) => MultiSelectItem(p, p.id)).toList(),
+            initialValue: _bookType.where((p) => selectedBookTypes.contains(p.id)).toList(),
+            title: Text('Chọn Nhà Xuất Bản'),
+            onConfirm: (values) {
+              setState(() {
+                _selectedBooktype = values;
+              });
+            },
+          );
+        },
+      );
+    }
 
     await _fetchPublishers();
+    await _fetchBookTypes();
 
     return showDialog(
       context: context,
@@ -224,12 +259,6 @@ class _ListBookState extends State<ListBook> {
                       ),
                     ),
                     TextField(
-                      controller: bookTypeIdController,
-                      decoration: InputDecoration(
-                        labelText: 'Mã loại sách',
-                      ),
-                    ),
-                    TextField(
                       controller: descriptionController,
                       decoration: InputDecoration(
                         labelText: 'Mô tả',
@@ -251,6 +280,21 @@ class _ListBookState extends State<ListBook> {
                       ),
                     ),
                     SizedBox(height: 16.0),
+                    GestureDetector(
+                      onTap: () => _selecBookTypes(dialogContext, setState),
+                      child: InputDecorator(
+                        decoration: InputDecoration(
+                          labelText: 'Chọn Nhà Xuất Bản',
+                          border: OutlineInputBorder(),
+                        ),
+                        child: Text(
+                          _selectedBooktype.isEmpty
+                              ? 'Chưa chọn nhà xuất bản'
+                              : _selectedBooktype.map((p) => p.id).join(', '),
+                        ),
+                      ),
+                    ),
+
                     selectedImage == null
                         ? Text('Chưa chọn ảnh')
                         : Image(image: selectedImage!.image, width: 100, height: 100, fit: BoxFit.cover),
@@ -277,10 +321,9 @@ class _ListBookState extends State<ListBook> {
 
                     final newName = nameController.text;
                     final newAuthorId = authorIdController.text;
-                    final newBookTypeId = bookTypeIdController.text;
                     final newDescription = descriptionController.text;
 
-                    if (newName.isEmpty || newAuthorId.isEmpty || newBookTypeId.isEmpty || newDescription.isEmpty || _selectedPublishers.isEmpty) {
+                    if (newName.isEmpty || newAuthorId.isEmpty  || newDescription.isEmpty || _selectedPublishers.isEmpty) {
                       setState(() {
                         isLoading = false;
                       });
@@ -292,7 +335,6 @@ class _ListBookState extends State<ListBook> {
 
                     book.name = newName;
                     book.authorId = newAuthorId;
-                    book.bookTypeId = newBookTypeId;
                     book.description = newDescription;
                     book.publishersList = _selectedPublishers;
 
@@ -302,9 +344,10 @@ class _ListBookState extends State<ListBook> {
                     }
 
                     final manxbList = _selectedPublishers.map((p) => p.id).toList();
+                    final maloaiList = _selectedBooktype.map((p) => p.id).toList();
 
                     try {
-                      await updateBook(book, manxbList);
+                       await updateBook(book, manxbList,maloaiList);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Cập nhật sách thành công!')),
                       );
