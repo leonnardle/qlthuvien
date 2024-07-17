@@ -1,11 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:luanvan/widget/deleteDialog.dart';
 import 'package:multi_select_flutter/dialog/mult_select_dialog.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
-
 import '../../model/book_model.dart';
 import '../../model/publisher_model.dart';
 import '../../service/book_service.dart';
@@ -30,7 +28,6 @@ class _ListBookState extends State<ListBook> {
   @override
   void initState() {
     super.initState();
-    // Khởi tạo Stream để lấy danh sách sách từ server
     _booksStream = fetchBooks();
   }
 
@@ -105,7 +102,7 @@ class _ListBookState extends State<ListBook> {
                               // Xử lý sự kiện sửa sách
                               await _showEditDialog(context, book);
                               // Cập nhật lại dữ liệu khi quay lại màn hình danh sách sách
-                              setState(() {});
+                              _refreshBooks();
                             },
                             icon: Icon(Icons.edit),
                           ),
@@ -115,7 +112,7 @@ class _ListBookState extends State<ListBook> {
                                 if (confirmed) {
                                   await deleteBook(book.id);
                                   // Cập nhật lại dữ liệu khi xóa sách
-                                  setState(() {});
+                                  _refreshBooks();
                                 }
                               });
                             },
@@ -142,12 +139,13 @@ class _ListBookState extends State<ListBook> {
             MaterialPageRoute(builder: (context) => AddBook()),
           ).then((_) {
             // Cập nhật lại dữ liệu khi quay lại màn hình danh sách sách
-            setState(() {});
+            _refreshBooks();
           });
         },
       ),
     );
   }
+
   Future<void> _showEditDialog(BuildContext context, Book book) async {
     final TextEditingController nameController = TextEditingController(text: book.name);
     final TextEditingController authorIdController = TextEditingController(text: book.authorId);
@@ -320,6 +318,7 @@ class _ListBookState extends State<ListBook> {
                       });
 
                       Navigator.pop(context);
+                      _refreshBooks();  // Cập nhật dữ liệu khi hoàn thành chỉnh sửa sách
                     }
                   },
                   child: Text('Cập Nhật'),
@@ -332,4 +331,9 @@ class _ListBookState extends State<ListBook> {
     );
   }
 
+  void _refreshBooks() {
+    setState(() {
+      _booksStream = fetchBooks();
+    });
+  }
 }

@@ -16,30 +16,32 @@ Stream<List<Book>> fetchBooks() async* {
     if (response.statusCode == 200) {
       List<Book> books = parseBook(response.body);
 
-      for (int i = 0; i < books.length; i++) {
+      // Fetch publishers for each book concurrently
+      final futures = books.map((book) async {
         try {
-          final publishersResponse = await http.get(Uri.parse('${ConFig.apiUrl}/sach/${books[i].id}/danhsachnxb'));
+          final publishersResponse = await http.get(Uri.parse('${ConFig.apiUrl}/sach/${book.id}/danhsachnxb'));
           if (publishersResponse.statusCode == 200) {
             final publishersData = jsonDecode(publishersResponse.body)['data'];
 
             if (publishersData != null && publishersData is List) {
-              books[i].publishersList = publishersData.map((p) => Publisher.fromJson(p)).toList();
+              book.publishersList = publishersData.map((p) => Publisher.fromJson(p)).toList();
             } else {
-              print('chưa có nhà xuất bản cho id: ${books[i].id}');
-              books[i].publishersList = [];
+              print('Chưa có nhà xuất bản cho id: ${book.id}');
+              book.publishersList = [];
             }
           } else {
-            print('Failed to load publishers for book ${books[i].id}');
-            books[i].publishersList = [];
+            print('Failed to load publishers for book ${book.id}');
+            book.publishersList = [];
           }
         } catch (e) {
-          print('Error fetching publishers for book ${books[i].id}: $e');
-          books[i].publishersList = [];
+          print('Error fetching publishers for book ${book.id}: $e');
+          book.publishersList = [];
         }
+      }).toList();
 
-        yield books.sublist(0, i + 1); // Trả về từng phần của danh sách sách
-        await Future.delayed(Duration(milliseconds: 100)); // Giả lập độ trễ tải dữ liệu
-      }
+      await Future.wait(futures);
+
+      yield books; // Trả về danh sách đầy đủ sách và nhà xuất bản
     } else {
       throw Exception('Unable to connect to API');
     }
