@@ -3,6 +3,8 @@ import 'package:api_cache_manager/api_cache_manager.dart';
 import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:luanvan/view/login_pageview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/login_reponse_model.dart';
 
@@ -11,13 +13,13 @@ class ShareService {
     try {
       if (kIsWeb) {
         final prefs = await SharedPreferences.getInstance();
-        // Kiểm tra sự tồn tại của khóa 'login_detail' trong SharedPreferences
         return prefs.containsKey('login_detail');
       } else {
         return await APICacheManager().isAPICacheKeyExist("login_detail");
       }
     } catch (e) {
-      return false;      print("Error checking cache key existence: $e");
+      print("Error checking cache key existence: $e");
+      return false;
 
     }
   }
@@ -46,10 +48,9 @@ class ShareService {
     return null;
   }
 
+  // khi đăng nhập thành công thì tạo biến cache đểluwuu nó
   static Future<void> setLoginDetail(LoginReponseModel model) async {
-    // Chuyển đổi đối tượng thành JSON
-    // Lưu dữ liệu vào SharedPreferences
-    // Lưu dữ liệu vào cache
+
     try {
       final data = loginReponseToJson(model);
       if (kIsWeb) {
@@ -71,7 +72,7 @@ class ShareService {
       if (kIsWeb) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('login_detail'); // Xóa dữ liệu khỏi SharedPreferences
-        Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
 
       } else {
         await APICacheManager().deleteCache("login_detail"); // Xóa dữ liệu khỏi cache

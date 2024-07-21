@@ -50,7 +50,7 @@ class _AddPublisherState extends State<AddPublisher> {
 
   Widget _addPublisherUI(BuildContext context){
     return Scaffold(
-      drawer: NavBar(),
+      //drawer: NavBar(),
       appBar: AppBar(
         title: Text('Thêm Loại Sách'),
       ),

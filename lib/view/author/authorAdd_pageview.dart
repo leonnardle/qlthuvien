@@ -43,29 +43,19 @@ class _AddAuthorState extends State<AddAuthor> {
         author.image = _selectedImage;
         author.imageBase64 = await author.getImageBase64();
       }
-      await insertAuthor(author);
+      try{
+        await insertAuthor(author);
 
-      // Thực hiện tải danh sách tác giả mới trong nền
-      fetchAuthor().then((list) {
-        // Sử dụng context hiện tại trong setState để đảm bảo widget còn hoạt động
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ListAuthor(items: list),
-            ),
-          );
+      }catch(error){
+
+      }finally{
+        if(mounted){
+          setState(() {
+            _isLoading=false;
+          });
         }
-      }).catchError((error) {
-        // Handle the error if any
-        setState(() {
-          _isLoading = false; // Kết thúc tải nếu có lỗi
-        });
-      });
+      }
 
-      setState(() {
-        _isLoading = false; // Kết thúc tải
-      });
     }
   }
 

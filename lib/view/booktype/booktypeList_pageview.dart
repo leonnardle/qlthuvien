@@ -1,31 +1,43 @@
 import 'package:flutter/material.dart';
-
+import 'package:luanvan/view/login_pageview.dart';
 import '../../model/booktype_model.dart';
 import '../../service/booktype_service.dart';
 import '../../widget/addButton.dart';
 import '../../widget/deleteDialog.dart';
-import '../../widget/navbar.dart';
 import 'booktypeAdd_pageview.dart';
 
 class ListBookType extends StatefulWidget {
-  late List<BookType>? items;
+  const ListBookType({super.key});
 
-  ListBookType({super.key, this.items});
-
+  @override
   _ListBookTypeState createState() => _ListBookTypeState();
 }
 
 class _ListBookTypeState extends State<ListBookType> {
+  List<BookType> _bookTypes = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    _bookTypes = await fetchBookType();
+    setState(() {});
+  }
+  void _refreshData() async {
+    await _loadData();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      drawer: NavBar(),
       appBar: AppBar(
         title: Text('Danh Sách Loại Sách'),
       ),
-      body: Stack(
+      body: _bookTypes.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : Stack(
         children: [
           Positioned(
             top: 20,
@@ -45,9 +57,9 @@ class _ListBookTypeState extends State<ListBookType> {
           Positioned.fill(
             top: 50,
             child: ListView.builder(
-              itemCount: widget.items?.length??0,
+              itemCount: _bookTypes.length,
               itemBuilder: (context, index) {
-                BookType booktype = widget.items![index];
+                BookType booktype = _bookTypes[index];
                 return GestureDetector(
                   child: Card(
                     margin: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -75,21 +87,17 @@ class _ListBookTypeState extends State<ListBookType> {
                           ),
                           IconButton(
                             onPressed: () {
-                             _showEditDialog(context, booktype);
+                              _showEditDialog(context, booktype);
                             },
                             icon: Icon(Icons.edit),
                           ),
                           IconButton(
                             onPressed: () {
                               showDeleteConfirmationDialog(context, (confirm) async {
-                                if(confirm){
-                                  await deleteBooktype(widget.items![index]);
-                                  BookType? book = widget.items?[index];
-                                  if (book != null) {
-                                    setState(() {
-                                      widget.items?.removeAt(index);
-                                    });
-                                  }
+                                if (confirm) {
+                                  await deleteBooktype(_bookTypes[index]);
+                                  _bookTypes.removeAt(index);
+                                  setState(() {}); // Cập nhật giao diện sau khi xóa
                                 }
                               });
                             },
@@ -99,9 +107,7 @@ class _ListBookTypeState extends State<ListBookType> {
                       ),
                     ),
                   ),
-                  onTap: () {
-
-                  },
+                  onTap: () {},
                 );
               },
             ),
@@ -110,13 +116,16 @@ class _ListBookTypeState extends State<ListBookType> {
             bottom: 60,
             right: 30,
             child: AddButton(
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                bool? result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddBookType(),
                   ),
                 );
+                if (result == true) {
+                  _refreshData(); // Cập nhật dữ liệu khi quay lại
+                }
               },
             ),
           ),
@@ -124,7 +133,8 @@ class _ListBookTypeState extends State<ListBookType> {
       ),
     );
   }
-  void _showEditDialog(BuildContext context, BookType booktype) async{
+
+  void _showEditDialog(BuildContext context, BookType booktype) async {
     final TextEditingController tenloaisachController = TextEditingController(text: booktype.name);
 
     showDialog(
@@ -155,14 +165,11 @@ class _ListBookTypeState extends State<ListBookType> {
                 final newName = tenloaisachController.text;
 
                 // Cập nhật tên loại sách
-                booktype.name=newName;
+                booktype.name = newName;
                 await updateBooktype(booktype);
 
                 // Cập nhật danh sách loại sách
-                List<BookType> bookList = await fetchBookType();
-                setState(() {
-                  widget.items = bookList;
-                });
+                _refreshData(); // Cập nhật dữ liệu sau khi chỉnh sửa
 
                 Navigator.of(context).pop();
               },
@@ -174,5 +181,3 @@ class _ListBookTypeState extends State<ListBookType> {
     );
   }
 }
-
-

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/model/booktype_model.dart';
 import '../model/publisher_model.dart';
 import '../widget/ImagePicker.dart';  // Import model nhà xuất bản
@@ -7,7 +8,6 @@ import '../widget/ImagePicker.dart';  // Import model nhà xuất bản
 class Book {
   String _id = '';
   String _name = '';
-  String _authorId = '';
   String _description = '';
   int _quantity = 0;
   Image? _image;
@@ -16,20 +16,20 @@ class Book {
   List<Publisher> _publishersList = [];
   List<String> _listBookTypeIds = [];
   List<BookType> _bookTypeList = [];
-
+  List<String> _listAuthorIds = [];
+  List<Author> _authorList = [];
   String get id => _id;
   set id(String value) => _id = value;
 
   String get name => _name;
   set name(String value) => _name = value;
 
-  String get authorId => _authorId;
-  set authorId(String value) => _authorId = value;
-
-
 
   List<String> get listBookTypeIds => _listBookTypeIds;
   set listBookTypeIds(List<String> value) => _listBookTypeIds = value;
+
+  List<String> get listAuthorIds => _listAuthorIds;
+  set listAuthorIds(List<String> value) => _listAuthorIds = value;
 
   List<String> get listPublisherIds => _listPublisherIds;
   set listPublisherIds(List<String> value) => _listPublisherIds = value;
@@ -52,6 +52,8 @@ class Book {
   List<BookType> get bookTypeList => _bookTypeList;  // Thêm getter và setter cho danh sách nhà xuất bản
   set bookTypeList(List<BookType> value) => _bookTypeList = value;
 
+  List<Author> get listauthor => _authorList;  // Thêm getter và setter cho danh sách tac gia
+  set listauthor(List<Author> value) => _authorList = value;
   Book();
 
   factory Book.fromJson(Map<String, dynamic> data) {
@@ -69,25 +71,21 @@ class Book {
     }
 
     List<Publisher> publishersList = [];
-    if (data['publishers'] != null) {
-      publishersList = List<Publisher>.from(data['publishers'].map((x) => Publisher.fromJson(x)));
-    }
+
     List<BookType> bookTypeList = [];
-    if (data['booktype'] != null) {
-      bookTypeList = List<BookType>.from(data['booktype'].map((x) => BookType.fromJson(x)));
-    }
+
     return Book()
       ..id = data['masach'] ?? ''
       ..name = data['tensach'] ?? ''
-      ..authorId = data['matg'] ?? ''
       ..bookTypeList = bookTypeList
-      ..listPublisherIds = List<String>.from(data['manxbList'] ?? [])
+      //..listPublisherIds = List<String>.from(data['manxbList'] ?? [])
       ..description = data['mota'] ?? ''
       ..quantity = data['soluong'] ?? 0
       ..image = image
       ..imageBase64 = imageBase64
       ..publishersList = publishersList
-      ..listBookTypeIds = List<String>.from(data['manloaiList'] ?? [])
+      //..listBookTypeIds = List<String>.from(data['manloaiList'] ?? [])
+      //..listAuthorIds = List<String>.from(data['mantgList'] ?? [])
     ;  // Cập nhật ở đây
   }
 

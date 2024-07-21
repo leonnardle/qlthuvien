@@ -22,28 +22,12 @@ class _ListPublisherState extends State<ListPublisher> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      drawer: NavBar(),
+      //drawer: NavBar(),
       appBar: AppBar(
-        title: Text('Danh Sách Loại Sách'),
+        title: Text('Danh Sách Loại nhà xuất bản'),
       ),
       body: Stack(
         children: [
-          Positioned(
-            top: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                'Danh Sách nhà xuất bản',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.yellow[700],
-                ),
-              ),
-            ),
-          ),
           Positioned.fill(
             top: 50,
             child:
@@ -52,7 +36,6 @@ class _ListPublisherState extends State<ListPublisher> {
               itemBuilder: (context, index) {
                 Publisher publisher = widget.items![index];
                    return GestureDetector(
-
                   child: Card(
                     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Padding(

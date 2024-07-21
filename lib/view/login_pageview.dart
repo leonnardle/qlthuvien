@@ -10,6 +10,7 @@ import 'package:luanvan/config.dart';
 import 'package:luanvan/function/checkValidate.dart';
 import 'package:luanvan/model/login_request_model.dart';
 import 'package:luanvan/service/api_service.dart';
+import 'package:luanvan/view/home_pageview.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
@@ -168,7 +169,7 @@ class _LoginPageState extends State<LoginPage> {
 
               APIService.login(model).then((reponse) => {
                 if(reponse){
-                  Navigator.pushNamedAndRemoveUntil(context, "/home", (route) => false)
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage()),)
                 }else{
                   FormHelper.showSimpleAlertDialog(
                       context, ConFig.appName, "email/password khong hop le", "OK", (){
