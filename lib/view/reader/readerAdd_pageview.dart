@@ -2,35 +2,39 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:luanvan/function/checkValidate.dart';
 
-import '../../model/booktype_model.dart';
-import '../../service/booktype_service.dart';
+import '../../model/reader_model.dart';
+import '../../service/reader_service.dart';
 import '../../widget/textbutton.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
 
-class AddBookType extends StatefulWidget {
-  AddBookType({Key? key}) : super(key: key);
-  _AddBookTypeState createState() => _AddBookTypeState();
+class AddReader extends StatefulWidget {
+  AddReader({Key? key}) : super(key: key);
+  _AddReaderState createState() => _AddReaderState();
 }
 
-class _AddBookTypeState extends State<AddBookType> {
-  String? maloai;
-  String? tenloai;
-  final GlobalKey<FormState> booktypeAddFormKey = GlobalKey<FormState>();
+class _AddReaderState extends State<AddReader> {
+  String? madocgia;
+  String? tendocgia;
+  String? email;
+  String? sdt;
+  final GlobalKey<FormState> readerAddFormKey = GlobalKey<FormState>();
   bool isAPIcallProcess = false;
 
-  Future<void> _saveBookType() async {
-
-    if (FormValidator.checkValidateAndSave(booktypeAddFormKey)) {
+  Future<void> _saveReader() async {
+    if (FormValidator.checkValidateAndSave(readerAddFormKey)) {
       setState(() {
         isAPIcallProcess=true;
       });
-      BookType bookType = BookType()
-        ..id = maloai!
-        ..name = tenloai!;
+      Reader reader = Reader()
+        ..id = madocgia!
+        ..name = tendocgia!
+        ..email=email!
+        ..phoneNumber=sdt!;
+
       try {
-        await insertBooktype(bookType);
+        await insertReader(reader);
         if(mounted) {
           Navigator.pop(context, true);
         }
@@ -56,8 +60,8 @@ class _AddBookTypeState extends State<AddBookType> {
           backgroundColor: HexColor("#283B71"),
           body: ProgressHUD(
             child: Form(
-              key: booktypeAddFormKey,
-              child: _addBooktypeUI(context),
+              key: readerAddFormKey,
+              child: _addReaderUI(context),
             ),
             key: UniqueKey(),
             inAsyncCall: isAPIcallProcess,
@@ -66,11 +70,11 @@ class _AddBookTypeState extends State<AddBookType> {
         ));
   }
 
-  Widget _addBooktypeUI(BuildContext context) {
+  Widget _addReaderUI(BuildContext context) {
     return Scaffold(
       // drawer: NavBar(),
       appBar: AppBar(
-        title: Text('Thêm Loại Sách'),
+        title: Text('Thêm doc gia'),
       ),
       body: isAPIcallProcess? const Center(child: CircularProgressIndicator()): Stack(
         children: [
@@ -82,18 +86,19 @@ class _AddBookTypeState extends State<AddBookType> {
                 color: Colors.green[100],
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Column(
+              child: SingleChildScrollView(child:
+              Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('mã loại'),
-                  FormHelper.inputFieldWidget(context, "mã loại", "mã loại",
+                  Text('mã doc gia'),
+                  FormHelper.inputFieldWidget(context, "mã doc gia", "mã doc gia",
                           (onValiDate) {
                         if (onValiDate.isEmpty) {
-                          return ("mã loại không được trống");
+                          return ("mã doc gia không được trống");
                         }
                       }, (onSaved) {
-                        maloai = onSaved;
+                        madocgia = onSaved;
                       },
                       borderFocusColor: Colors.white,
                       borderColor: Colors.white,
@@ -101,18 +106,58 @@ class _AddBookTypeState extends State<AddBookType> {
                       hintColor: Colors.black,
                       borderRadius: 10),
                   SizedBox(height: 10),
-                  Text('tên loại'),
+                  Text('tên doc gia'),
                   FormHelper.inputFieldWidget(
                     context,
-                    "tên loại",
-                    "tên loại",
+                    "tên doc gia",
+                    "tên doc gia",
                         (onValiDate) {
                       if (onValiDate.isEmpty) {
-                        return ("tên loại không được để trống");
+                        return ("tên doc gia không được để trống");
                       }
                     },
                         (onSaved) {
-                      tenloai = onSaved;
+                      tendocgia = onSaved;
+                    },
+                    borderFocusColor: Colors.white,
+                    borderColor: Colors.white,
+                    textColor: Colors.black,
+                    hintColor: Colors.black,
+                    borderRadius: 10,
+                  ),
+                  SizedBox(height: 10),
+                  Text('email'),
+                  FormHelper.inputFieldWidget(
+                    context,
+                    "email",
+                    "email",
+                        (onValiDate) {
+                      if (onValiDate.isEmpty) {
+                        return ("email không được để trống");
+                      }
+                    },
+                        (onSaved) {
+                      email = onSaved;
+                    },
+                    borderFocusColor: Colors.white,
+                    borderColor: Colors.white,
+                    textColor: Colors.black,
+                    hintColor: Colors.black,
+                    borderRadius: 10,
+                  ),
+                  SizedBox(height: 10),
+                  Text('sdt'),
+                  FormHelper.inputFieldWidget(
+                    context,
+                    "sdt",
+                    "sdt",
+                        (onValiDate) {
+                      if (onValiDate.isEmpty) {
+                        return ("tên doc gia không được để trống");
+                      }
+                    },
+                        (onSaved) {
+                      sdt = onSaved;
                     },
                     borderFocusColor: Colors.white,
                     borderColor: Colors.white,
@@ -122,12 +167,12 @@ class _AddBookTypeState extends State<AddBookType> {
                   ),
                   SizedBox(height: 10),
                   MyButton(
-                    onTap: _saveBookType,
-                    text: 'them loai sach',
+                    onTap: _saveReader,
+                    text: 'them doc gia',
                   ),
                 ],
               ),
-            ),
+            )),
           ),
           Positioned(
             top: 20,

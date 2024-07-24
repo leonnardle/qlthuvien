@@ -19,7 +19,7 @@ void main() async {
   if (defaultTargetPlatform == TargetPlatform.android) {
     bool _result = await ShareService.isLogged();
     if (_result) {
-      _defaultHome = MyHomePage();
+      _defaultHome =const MyHomePage();
     }
   }
 
@@ -27,9 +27,9 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final Widget defaultHome;
+  final Widget? defaultHome;
 
-  const MyApp({super.key, required this.defaultHome});
+  const MyApp({super.key,  this.defaultHome});
 
   @override
   Widget build(BuildContext context) {

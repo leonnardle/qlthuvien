@@ -70,20 +70,14 @@ class Book {
       }
     }
 
-    List<Publisher> publishersList = [];
-
-    List<BookType> bookTypeList = [];
-
     return Book()
       ..id = data['masach'] ?? ''
       ..name = data['tensach'] ?? ''
-      ..bookTypeList = bookTypeList
       //..listPublisherIds = List<String>.from(data['manxbList'] ?? [])
       ..description = data['mota'] ?? ''
       ..quantity = data['soluong'] ?? 0
       ..image = image
       ..imageBase64 = imageBase64
-      ..publishersList = publishersList
       //..listBookTypeIds = List<String>.from(data['manloaiList'] ?? [])
       //..listAuthorIds = List<String>.from(data['mantgList'] ?? [])
     ;  // Cập nhật ở đây

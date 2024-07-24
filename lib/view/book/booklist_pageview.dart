@@ -19,22 +19,21 @@ import '../../widget/navbar.dart';
 import 'bookAdd_pageview.dart';
 
 class ListBook extends StatefulWidget {
-  final Future<List<Book>>? booksFuture;  // Chuyển Future vào constructor
+  late Future<List<Book>>? booksFuture;  // Chuyển Future vào constructor
 
   ListBook({Key? key,  this.booksFuture}) : super(key: key);
 
   @override
   _ListBookState createState() => _ListBookState();
 }
-
 class _ListBookState extends State<ListBook> {
-  late Future<List<Book>> _booksFuture;
 
   @override
+/*
   void initState() {
     super.initState();
-    _booksFuture = fetchBooks(); // Khởi tạo Future để lấy dữ liệu sách ngay lập tức
-    // tự động Cập nhật dữ liệu mỗi 10 giây
+    _booksFuture = widget.booksFuture ?? fetchBooks();
+
     Timer.periodic(const Duration(minutes: 10), (timer) async {
       try {
         var books = await fetchBooks();
@@ -51,6 +50,7 @@ class _ListBookState extends State<ListBook> {
       }
     });
   }
+*/
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class _ListBookState extends State<ListBook> {
         title: Text('Danh Sách Sách'),
       ),
       body: FutureBuilder<List<Book>>(
-        future: _booksFuture,
+        future: widget.booksFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -74,6 +74,7 @@ class _ListBookState extends State<ListBook> {
               itemBuilder: (context, index) {
                 Book book = books[index];
                 return GestureDetector(
+
                   child: Card(
                     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                     child: Padding(
@@ -90,7 +91,7 @@ class _ListBookState extends State<ListBook> {
                             )
                                 : const Icon(Icons.book, size: 80),
                           ),
-                          SizedBox(width: 20),
+                          const SizedBox(width: 20),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,17 +103,11 @@ class _ListBookState extends State<ListBook> {
                                     fontSize: 16,
                                   ),
                                 ),
-                                const SizedBox(height: 4),
                                 Text('Mã sách: ${book.id}'),
-                                const SizedBox(height: 4),
                                 Text('Tên sách: ${book.name}'),
-                                const SizedBox(height: 4),
                                 Text('Mã tác giả: ${book.listauthor.map((p)=>p.id).join(', ')}'),
-                                const SizedBox(height: 4),
                                 Text('Mã loại sách: ${book.bookTypeList.map((p) => p.id).join(', ')}'),
-                                const SizedBox(height: 4),
                                 Text('Nhà xuất bản: ${book.publishersList.map((p) => p.id).join(', ')}'),
-                                const SizedBox(height: 4),
                                 Text('Mô tả: ${book.description}'),
                               ],
                             ),
@@ -149,12 +144,12 @@ class _ListBookState extends State<ListBook> {
       ),
       floatingActionButton: AddButton(
         onPressed: () async{
-          bool result=await
+          bool? result=await
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddBook()),
           );
-          if(result){
+          if(result!=null&&result==true){
             _refreshBooks();
           }
         },
@@ -422,7 +417,7 @@ class _ListBookState extends State<ListBook> {
   }
   void _refreshBooks() {
     setState(() {
-      _booksFuture = fetchBooks(); // Cập nhật Future để lấy dữ liệu mới
+      widget.booksFuture = fetchBooks(); // Cập nhật Future để lấy dữ liệu mới
     });
   }
 }

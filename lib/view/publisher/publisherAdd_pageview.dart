@@ -23,12 +23,27 @@ class _AddPublisherState extends State<AddPublisher> {
   final GlobalKey<FormState> PublisherAddFormKey = GlobalKey<FormState>();
   bool isAPIcallProcess = false;
 
-  void addNhaxuatban() async{
-    if(FormValidator.checkValidateAndSave(PublisherAddFormKey)) {
-      Publisher publisher = Publisher()..id=manxb!..name=tennxb!..address=diachi!..phonenumber=sdt!;
-      await insertPublisher(publisher);
-      List<Publisher> list=await fetchPublisher();
-      Navigator.push(context, MaterialPageRoute(builder:(context)=> ListPublisher(items: list,)));
+  void addNhaxuatban() async {
+    if (FormValidator.checkValidateAndSave(PublisherAddFormKey)) {
+      Publisher publisher = Publisher()
+        ..id = manxb!
+        ..name = tennxb!
+        ..address = diachi!
+        ..phonenumber = sdt!;
+
+      try {
+        await insertPublisher(publisher);
+        if (mounted) {
+          Navigator.pop(context, true);
+        }
+      } catch (e) {
+        // Xử lý lỗi nếu có
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi khi thêm nhà xuất bản: $e')),
+          );
+        }
+      }
     }
   }
   @override
@@ -37,13 +52,13 @@ class _AddPublisherState extends State<AddPublisher> {
         child: Scaffold(
           backgroundColor: HexColor("#283B71"),
           body: ProgressHUD(
-            child: Form(
-              key: PublisherAddFormKey,
-              child: _addPublisherUI(context),
-            ),
             key: UniqueKey(),
             inAsyncCall: isAPIcallProcess,
             opacity: 0.3,
+            child:  Form(
+              key: PublisherAddFormKey,
+              child: _addPublisherUI(context),
+            ),
           ),
         ));
   }

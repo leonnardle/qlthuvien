@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/model/booktype_model.dart';
@@ -102,7 +103,7 @@ class _AddBookState extends State<AddBook> {
       final book = Book()
         ..id = _idController.text
         ..name = _nameController.text
-        ..listPublisherIds = _selectedPublishers.map((p) => p.id).toList() // Cập nhật danh sách nhà xuất bản
+        ..listPublisherIds = _selectedPublishers.map((p) => p.id).toList() // Cập nhật danh sách ma nhà xuất bản
         ..listBookTypeIds = _selectedBooktype.map((p) => p.id).toList()
         ..listAuthorIds = _selectedAuthor.map((p) => p.id).toList()
         ..description = _describerController.text;
@@ -113,9 +114,13 @@ class _AddBookState extends State<AddBook> {
       }
       try {
         await insertBook(book);
-        Navigator.pop(context,true);
+        if(mounted) {
+          Navigator.pop(context, true);
+        }
       } catch (error) {
-        print('Lỗi khi thêm sách: $error');
+        if (kDebugMode) {
+          print('Lỗi khi thêm sách: $error');
+        }
       } finally {
         if (mounted) {
           setState(() {

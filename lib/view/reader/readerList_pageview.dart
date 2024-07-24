@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:luanvan/model/reader_model.dart';
+import 'package:luanvan/service/reader_service.dart';
 import 'package:luanvan/view/login_pageview.dart';
+import 'package:luanvan/view/reader/readerAdd_pageview.dart';
 import '../../model/booktype_model.dart';
 import '../../service/booktype_service.dart';
 import '../../widget/addButton.dart';
 import '../../widget/deleteDialog.dart';
-import 'booktypeAdd_pageview.dart';
 
-class ListBookType extends StatefulWidget {
-  late Future<List<BookType>>? bookTypeFuture;
+class ListReader extends StatefulWidget {
+  late Future<List<Reader>>? readerFuture;
 
-  ListBookType({super.key, this.bookTypeFuture});
+  ListReader({super.key, this.readerFuture});
 
   @override
   _ListBookTypeState createState() => _ListBookTypeState();
 }
 
-class _ListBookTypeState extends State<ListBookType> {
+class _ListBookTypeState extends State<ListReader> {
 
- /* @override
+  /* @override
   void initState() {
     super.initState();
     _booktypeFuture = fetchBookType();
@@ -27,27 +29,27 @@ class _ListBookTypeState extends State<ListBookType> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Danh Sách Loại Sách'),
+        title: Text('Danh Sách doc gia'),
       ),
-      body: FutureBuilder<List<BookType>>(
-          future: widget.bookTypeFuture,
+      body: FutureBuilder<List<Reader>>(
+          future: widget.readerFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Lỗi khi tải sách: ${snapshot.error}'));
+              return Center(child: Text('Lỗi khi tải doc gia: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('Không có sách'));
+              return const Center(child: Text('Không có doc gia nao'));
             } else {
-              final  booktypeslist=snapshot.data!;
+              final  readersList=snapshot.data!;
               return ListView.builder(
-                itemCount: booktypeslist.length,
+                itemCount: readersList.length,
                 itemBuilder: (context, index) {
-                  BookType booktype = booktypeslist[index];
+                  Reader reader = readersList[index];
                   return GestureDetector(
                     child: Card(
                       margin:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
@@ -57,36 +59,41 @@ class _ListBookTypeState extends State<ListBookType> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Loại Sách ${index + 1}',
+                                    'doc gia ${index + 1}',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
                                   SizedBox(height: 4),
-                                  Text('mã loại : ${booktype.id}'),
+                                  Text('mã đọc giả : ${reader.id}'),
                                   SizedBox(height: 4),
-                                  Text('tên loại : ${booktype.name}'),
+                                  Text('tên đọc giả : ${reader.name}'),
+                                  //SizedBox(height: 4),
+                                  //Text('danh sách phiếu mượn : ${reader.loanId}'),
+                                  SizedBox(height: 4),
+                                  Text('email : ${reader.email}'),
+                                  SizedBox(height: 4),
+                                  Text('sdt : ${reader.phoneNumber}'),
                                 ],
                               ),
                             ),
                             IconButton(
                               onPressed: () {
-                                _showEditDialog(context, booktype);
+                                _showEditDialog(context, reader);
                               },
                               icon: Icon(Icons.edit),
                             ),
                             IconButton(
                               onPressed: () {
-                                showDeleteConfirmationDialog(context,
-                                    (confirm) async {
-                                  if (confirm) {
-                                    await deleteBooktype(booktypeslist[index]);
-                                    booktypeslist.removeAt(index);
-                                    setState(
-                                        () {}); // Cập nhật giao diện sau khi xóa
-                                  }
-                                });
+                                showDeleteConfirmationDialog(context, (confirm) async {
+                                      if (confirm) {
+                                        bool result=await deleteReader(readersList[index]);
+                                        if(result){
+                                          _refreshData();
+                                        }
+                                      }
+                                    });
                               },
                               icon: Icon(Icons.delete),
                             ),
@@ -104,7 +111,7 @@ class _ListBookTypeState extends State<ListBookType> {
         onPressed: () async {
           bool result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddBookType()),
+            MaterialPageRoute(builder: (context) => AddReader()),
           );
           if (result) {
             _refreshData();
@@ -114,24 +121,38 @@ class _ListBookTypeState extends State<ListBookType> {
     );
   }
 
-  void _showEditDialog(BuildContext context, BookType booktype) async {
-    final TextEditingController tenloaisachController =
-        TextEditingController(text: booktype.name);
+  void _showEditDialog(BuildContext context, Reader reader) async {
+    final TextEditingController tendocgiaController = TextEditingController(text: reader.name);
+    final TextEditingController emailController = TextEditingController(text: reader.email);
+    final TextEditingController sdtController = TextEditingController(text: reader.phoneNumber);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Chỉnh Sửa Loại Sách'),
+          title: Text('Chỉnh Sửa doc gia'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: tenloaisachController,
+                controller: tendocgiaController,
                 decoration: InputDecoration(
-                  labelText: 'Tên Loại Sách',
+                  labelText: 'Tên doc gia',
                 ),
               ),
+              TextField(
+                controller: sdtController,
+                decoration: InputDecoration(
+                  labelText: 'sdt',
+                ),
+              ),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'email',
+                ),
+              ),
+
             ],
           ),
           actions: [
@@ -143,11 +164,16 @@ class _ListBookTypeState extends State<ListBookType> {
             ),
             TextButton(
               onPressed: () async {
-                final newName = tenloaisachController.text;
+                final newName = tendocgiaController.text;
+                final newSdt = sdtController.text;
+                final newEmail = emailController.text;
 
                 // Cập nhật tên loại sách
-                booktype.name = newName;
-                await updateBooktype(booktype);
+                reader.name = newName;
+                reader.email = newEmail;
+                reader.phoneNumber = newSdt;
+
+                await updateReader(reader);
 
                 // Cập nhật danh sách loại sách
                 _refreshData(); // Cập nhật dữ liệu sau khi chỉnh sửa
@@ -163,7 +189,7 @@ class _ListBookTypeState extends State<ListBookType> {
   }
   void _refreshData() {
     setState(() {
-      widget.bookTypeFuture = fetchBookType(); // Cập nhật Future để lấy dữ liệu mới
+      widget.readerFuture = fetchReader(); // Cập nhật Future để lấy dữ liệu mới
     });
   }
 

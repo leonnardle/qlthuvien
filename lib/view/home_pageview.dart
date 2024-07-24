@@ -1,15 +1,26 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:luanvan/service/api_service.dart';
-import 'package:luanvan/view/author/authorList_pageview.dart';
-import 'package:luanvan/view/publisher/publisherList_pageview.dart';
-
-import '../service/book_service.dart';
-import '../service/shared.dart';
 import 'package:luanvan/model/book_model.dart';
-import 'package:luanvan/model/publisher_model.dart';
-import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/model/booktype_model.dart';
+import 'package:luanvan/model/loanslip_model.dart';
+import 'package:luanvan/model/payslip_model.dart';
+import 'package:luanvan/model/publisher_model.dart';
+import 'package:luanvan/model/reader_model.dart';
+import 'package:luanvan/service/book_service.dart';
+import 'package:luanvan/service/booktype_service.dart';
+import 'package:luanvan/service/loanSlip_service.dart';
+import 'package:luanvan/service/payslip_service.dart';
+import 'package:luanvan/service/publisher_service.dart';
+import 'package:luanvan/service/reader_service.dart';
+
+import 'package:luanvan/view/author/authorList_pageview.dart';
+import 'package:luanvan/view/loanslip/loanslipList_pageview.dart';
+import 'package:luanvan/view/payslip/payslipList_pageview.dart';
+import 'package:luanvan/view/publisher/publisherList_pageview.dart';
+import 'package:luanvan/view/reader/readerList_pageview.dart';
+
+import '../service/shared.dart';
+import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/service/author_service.dart';
 
 import 'package:luanvan/view/booktype/booktypeList_pageview.dart';
@@ -81,18 +92,17 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text('Quản Lý Thông Tin Sách'),
             onTap: () {
+              // Tạo Future mới mỗi khi chọn
+              Future<List<Book>> booksFuture = fetchBooks();
               onItemSelected(FutureBuilder<List<Book>>(
-                future: fetchBooks(),  // Tạo Future mới mỗi khi chọn
+                future: booksFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error:  ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    Future<List<Book>> books = fetchBooks();
-                    return ListBook(booksFuture: books);  // Truyền danh sách sách vào ListBook
-                  } else {
-                    return ListBook();  // Trường hợp không có dữ liệu
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else{
+                    return ListBook(booksFuture: booksFuture,);
                   }
                 },
               ));
@@ -101,33 +111,44 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text('Quản Lý Loại Sách'),
             onTap: () async {
-              onItemSelected(ListBookType());
+              Future<List<BookType>> bookstypeFuture = fetchBookType();
+              onItemSelected(ListBookType(bookTypeFuture: bookstypeFuture,));
             },
           ),
           ListTile(
             title: Text('Quản Lý Nhà Xuất Bản'),
             onTap: () async {
-              onItemSelected(ListPublisher());
+              Future<List<Publisher>> publisherlist = fetchPublisher();
+              onItemSelected(ListPublisher(items: publisherlist,));
             },
           ),
           ListTile(
             title: Text('Quản Lý Tác Giả'),
             onTap: () async {
-              List<Author> list = await fetchAuthor();
+              Future<List<Author>> list =  fetchAuthor();
               onItemSelected(ListAuthor(items: list));
             },
           ),
           ListTile(
             title: Text('Quản Lý Đọc Giả'),
-            onTap: () async {},
+            onTap: () async {
+              Future<List<Reader>> list =  fetchReader();
+              onItemSelected(ListReader(readerFuture: list));
+            },
           ),
           ListTile(
             title: Text('Quản Lý Phiếu Mượn'),
-            onTap: () async {},
+            onTap: () async {
+              Future<List<LoanSlip>> list =  fetchLoanslip();
+              onItemSelected(ListLoanSlip(LoanSlipFuture: list));
+            },
           ),
           ListTile(
             title: Text('Quản Lý Phiếu Trả'),
-            onTap: () async {},
+            onTap: () async {
+              Future<List<PaySlip>> list =  fetchPaySlip();
+              onItemSelected(ListPaySlip(PaySlipFuture: list));
+            },
           ),
         ],
       ),

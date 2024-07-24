@@ -75,7 +75,7 @@ Future<List<Book>> fetchBooks() async {
     }
   } catch (e) {
     print('Error fetching books: $e');
-    throw e; // Ném lỗi ra ngoài
+    rethrow; // Ném lỗi ra ngoài
   }
 }
 Future<void> insertBook(Book book) async {
@@ -137,5 +137,14 @@ Future<List<Publisher>> fetchPublisherByBookId(String BookId) async {
     return parsePublisher(response.body);
   } else {
     throw Text('không tìm thấy nha xuat ban nào từ mã sach này');
+  }
+}
+Future<bool> checkBookExists(String bookIds) async {
+  final response = await http.get(Uri.parse('${ConFig.apiUrl}/sach/$bookIds'));
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data['success'];
+  } else {
+    return false;
   }
 }

@@ -10,7 +10,7 @@ import '../../widget/deleteDialog.dart';
 import '../../widget/navbar.dart';
 
 class ListAuthor extends StatefulWidget {
-  late List<Author>? items;
+  late Future<List<Author>>? items;
 
   ListAuthor({Key? key, this.items}) : super(key: key);
 
@@ -19,23 +19,22 @@ class ListAuthor extends StatefulWidget {
 }
 
 class _ListAuthorState extends State<ListAuthor> {
-  late Future<List<Author>> _authorFuture;
 
-  @override
+/*  @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _authorFuture = fetchAuthor();
-  }
+    w = fetchAuthor();
+  }*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // drawer: NavBar(),
       appBar: AppBar(
-        title: Text('Danh Sách Tác Giả'),
+        title: const Text('Danh Sách Tác Giả'),
       ),
       body: FutureBuilder<List<Author>>(
-        future: _authorFuture,
+        future: widget.items,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -255,11 +254,6 @@ class _ListAuthorState extends State<ListAuthor> {
                     }
                     await updateAuthor(author);
                     // Cập nhật danh sách tác giả
-                    List<Author> authorList = await fetchAuthor();
-                    setState(() {
-                      widget.items = authorList;
-                      isLoading = false;
-                    });
                     Navigator.of(context).pop();
                     _refreshAuthors();
                   },
@@ -274,7 +268,7 @@ class _ListAuthorState extends State<ListAuthor> {
   }
   void _refreshAuthors() {
     setState(() {
-      _authorFuture = fetchAuthor(); // Cập nhật Future để lấy dữ liệu mới
+      widget.items = fetchAuthor(); // Cập nhật Future để lấy dữ liệu mới
     });
   }
 

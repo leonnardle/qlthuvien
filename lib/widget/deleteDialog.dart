@@ -6,7 +6,7 @@ void showDeleteConfirmationDialog(BuildContext context, Function(bool) onConfirm
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text("Xác nhận xóa sách"),
+        title: Text("Xác nhận xóa "),
         content: Text("Bạn có chắc chắn muốn xóa cuốn sách này không?"),
         actions: <Widget>[
           TextButton(
