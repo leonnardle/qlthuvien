@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:luanvan/model/author_model.dart';
@@ -136,7 +135,9 @@ Future<List<Publisher>> fetchPublisherByBookId(String BookId) async {
   if (response.statusCode == 200) {
     return parsePublisher(response.body);
   } else {
-    throw Text('không tìm thấy nha xuat ban nào từ mã sach này');
+    //throw Text('không tìm thấy nha xuat ban nào từ mã sach này');
+    throw Exception('Không tìm thấy thấy nha xuat ban nào từ mã sach này');
+
   }
 }
 Future<bool> checkBookExists(String bookIds) async {

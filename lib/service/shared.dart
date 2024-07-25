@@ -47,7 +47,6 @@ class ShareService {
     }
     return null;
   }
-
   // khi đăng nhập thành công thì tạo biến cache đểluwuu nó
   static Future<void> setLoginDetail(LoginReponseModel model) async {
 
@@ -76,7 +75,7 @@ class ShareService {
 
       } else {
         await APICacheManager().deleteCache("login_detail"); // Xóa dữ liệu khỏi cache
-        Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
       }
     } catch (e) {
       print("Error logging out and clearing cache: $e");

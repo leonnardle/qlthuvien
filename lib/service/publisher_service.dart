@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:html';
-
 import 'package:http/http.dart' as http;
 import 'package:luanvan/config.dart';
 import 'package:luanvan/model/publisher_model.dart';
@@ -111,6 +109,6 @@ Future<List<Book>> fetchBooksByPublisher(String publisherId) async {
   if (response.statusCode == 200) {
     return parseBook(response.body);
   } else {
-    throw Text('không tìm thấy sách nào được phát hành từ nhà xuất bản này');
+    throw Exception('Không tìm thấy sách nào được phát hành từ nhà xuất bản này');
   }
 }

@@ -16,9 +16,10 @@ class APIService{
     var url = Uri.parse('${ConFig.apiUrl}${ConFig.loginAPI}');
     var reponse=await client.post(url,headers: requestHeader,body: jsonEncode(model.toJson()));
     if(reponse.statusCode==200){
-      await ShareService.setLoginDetail(LoginreponseJson(reponse.body));
+      await ShareService.setLoginDetail(loginReponseJson(reponse.body));
       return true;
     }else{
+      print(reponse.body);
       return false;
     }
   }
@@ -31,10 +32,8 @@ class APIService{
     return registerReponseModel(reponse.body);
   }
   static Future<String> getUserProfile () async {
-    var loginDetail=await ShareService.loginDetails();
     Map<String,String> requestHeader={
-      'Content-Type':'application/json',
-      'Authorization':'Basic ${loginDetail!.data?[0].token}'
+      'Content-Type':'application/json'
     };
     var url=Uri.http(ConFig.apiUrl,ConFig.userProfileAPI);
     var reponse=await client.get(url,headers: requestHeader,);
