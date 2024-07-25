@@ -135,3 +135,11 @@ Future<bool> checkLoanSlipExists(String loanIds) async {
     return false;
   }
 }
+Future<List<Book>> fetchBooksByLoanSlip(String publisherId) async {
+  final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/${publisherId}/danhsachsach'));
+  if (response.statusCode == 200) {
+    return parseBook(response.body);
+  } else {
+    throw Text('không tìm thấy sách nào từ phiếu mượn này');
+  }
+}

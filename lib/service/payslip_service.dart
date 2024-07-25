@@ -79,63 +79,58 @@ Future<bool> insertPaySlip(PaySlip paySlip) async {
   return false;
 
 }
-/*
-Future<void> updateLoanslip(PaySlip loanSlip) async {
+Future<bool> updatePaySlip(PaySlip paySlip) async {
   try {
-    final response = await http.put(Uri.parse('${ConFig.apiUrl}/docgia/${loanSlip.id}'),
+    final response = await http.put(Uri.parse('${ConFig.apiUrl}/phieutra/${paySlip.id}'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
       body: jsonEncode({
-        'mapm': loanSlip.id,
-        'madocgia': loanSlip.readerId,
-        'ngaymuon': loanSlip.loanDay.toIso8601String().split('T')[0], //format ngay
-        'trangthai': loanSlip.status
+        'maphieumuon': paySlip.loanId,
+        'ngaytra': paySlip.payDay.toIso8601String().split('T')[0], //format ngay
+        'ghichu': paySlip.note,
+        "masachList":paySlip.listBookIds
       }),
     );
-*/
 /*    print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/Reader/')}');
     print('Dữ liệu gửi đi: ${jsonEncode({'maloai': book.id, 'tenloai': book.name})}');
     print('Trạng thái phản hồi: ${response.statusCode}');
     print('Nội dung phản hồi: ${response.body}');*//*
 */
-/*
+
     if (response.statusCode == 200) {
-      fetchLoanslip();
+      print('Đã xảy ra lỗi khi cập nhật loại sách cho ${paySlip.id}');
+      return true;
     } else {
-      print('Đã xảy ra lỗi khi cập nhật loại sách cho ${loanSlip.id}');
+      print('Đã xảy ra lỗi khi cập nhật loại sách cho ${paySlip.id}');
+      return false;
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu cập nhật loại sách: $e');
+    return false;
   }
 }
-Future<bool> deleteLoanslip(LoanSlip book) async {
+Future<bool> deletePaySlip(PaySlip paySlip) async {
   try {
     final response =  await http.delete(
-        Uri.parse('${ConFig.apiUrl}/phieumuon/${book.id}'),
+        Uri.parse('${ConFig.apiUrl}/phieutra/${paySlip.id}'),
         headers: {"Accept": "application/json"}
     );
-*//*
-*/
 /*    print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/Reader/')}');
     print('Dữ liệu gửi đi: ${jsonEncode({'maloai': book.id})}');
     print('Trạng thái phản hồi: ${response.statusCode}');
-    print('Nội dung phản hồi: ${response.body}');*//*
-*/
-/*
+    print('Nội dung phản hồi: ${response.body}');*/
 
     if (response.statusCode == 200) {
       return true;
     }else{
-
+      return false;
     }
   } catch (e) {
 
     return false;
   }
-  return false;
-}*//*
+}
 
 
-*/

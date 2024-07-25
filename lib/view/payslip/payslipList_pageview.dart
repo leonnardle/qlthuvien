@@ -1,10 +1,14 @@
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:luanvan/model/book_model.dart';
+import 'package:luanvan/service/loanSlip_service.dart';
 import 'package:luanvan/service/payslip_service.dart';
 import 'package:luanvan/view/payslip/payAdd_pageview.dart';
 
 import '../../model/payslip_model.dart';
+import '../../service/book_service.dart';
 import '../../widget/addButton.dart';
 import '../../widget/deleteDialog.dart';
 
@@ -82,16 +86,15 @@ class _ListPaySlipState extends State<ListPaySlip> {
                             ),
                             IconButton(
                               onPressed: () {
-                              //  _showEditDialog(context, paySlip);
+                                _showEditDialog(context, paySlip);
                               },
                               icon: Icon(Icons.edit),
                             ),
                             IconButton(
                               onPressed: () {
-/*
                                 showDeleteConfirmationDialog(context, (confirm) async {
                                   if (confirm) {
-                                    bool result=await dele(PaySlip);
+                                    bool result=await deletePaySlip(paySlip);
                                     if(result){
                                       _refreshData();
                                     }else{
@@ -101,15 +104,8 @@ class _ListPaySlipState extends State<ListPaySlip> {
                                       }}
                                   }
                                 });
-*/
                               },
                               icon: Icon(Icons.delete),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                //_showReturnSlipDialog(context, paySlip);
-                              },
-                              icon: Icon(Icons.library_add_check_sharp),
                             ),
                           ],
                         ),
@@ -136,7 +132,7 @@ class _ListPaySlipState extends State<ListPaySlip> {
   }
 
   void _showEditDialog(BuildContext context, PaySlip paySlip) async {
-    late TextEditingController maphieumuonController = TextEditingController(text: paySlip.readerId);
+    late TextEditingController maphieumuonController = TextEditingController(text: paySlip.loanId);
     late TextEditingController _bookIdsController = TextEditingController(text: paySlip.bookList.map((e) => e.id).join(', '));
 
     showDialog(
@@ -148,9 +144,9 @@ class _ListPaySlipState extends State<ListPaySlip> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: madocgiaController,
+                controller: maphieumuonController,
                 decoration: InputDecoration(
-                  labelText: 'mã doc gia',
+                  labelText: 'mã phieu muon',
                 ),
               ),
               TextField(
@@ -172,16 +168,25 @@ class _ListPaySlipState extends State<ListPaySlip> {
               onPressed: () async {
                 List<String> validBookIds = [];
                 List<String> invalidBooks = [];
-                bool checkReader = await checkReaderExists(madocgiaController.text);
-                if (checkReader) {
+                bool checkloan = await checkLoanSlipExists(maphieumuonController.text);
+
+                if (checkloan) {
+                  // Lấy danh sách các sách từ phiếu mượn hiện tại
+                  List<Book> loanBook = await fetchBooksByLoanSlip(maphieumuonController.text);
+                  List<String> loanBookIds = loanBook.map((e) => e.id).toList();
+
+                  // Lấy danh sách ID sách từ text field
                   List<String> bookIds = _bookIdsController.text.split(',').map((line) => line.trim()).toList();
                   bookIds.removeWhere((id) => id.isEmpty);
+
                   try {
+                    // Kiểm tra sự tồn tại của các sách
                     List<Future<bool>> checkExistenceFutures = bookIds.map((id) => checkBookExists(id)).toList();
                     List<bool> existResults = await Future.wait(checkExistenceFutures);
 
                     bookIds.asMap().forEach((index, id) {
-                      if (existResults[index]) {
+                      // Kiểm tra nếu sách tồn tại và thuộc về phiếu mượn
+                      if (existResults[index] && loanBookIds.contains(id)) {
                         validBookIds.add(id);
                       } else {
                         invalidBooks.add(id);
@@ -190,21 +195,23 @@ class _ListPaySlipState extends State<ListPaySlip> {
 
                     if (invalidBooks.isNotEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        content: Text('Những sách sau không tồn tại: ${invalidBooks.join(', ')}'),
+                        content: Text('Những sách sau không tồn tại hoặc không thuộc phiếu mượn này: ${invalidBooks.join(', ')}'),
                       ));
                     } else {
-                      loanSlip.readerId = madocgiaController.text;
-                      loanSlip.listBookIds = validBookIds;
-                      bool result=await updateLoanslip(loanSlip);
-                      if(result&&mounted){
+                      paySlip.loanId = maphieumuonController.text;
+                      paySlip.listBookIds = validBookIds;
+                      bool result = await updatePaySlip(paySlip);
+
+                      if (result && mounted) {
                         _refreshData();
                         Navigator.pop(context, true);
-                      }else{
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('không thể chỉnh sửa đã có phiếu trả tương ứng cho phiếu mượn này'),
-                        ));
-                      }
+                      } else {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Không thể chỉnh sửa, đã có phiếu trả tương ứng cho phiếu mượn này'),
+                          ));
 
+                      }
                     }
                   } catch (error) {
                     if (kDebugMode) {
@@ -212,10 +219,16 @@ class _ListPaySlipState extends State<ListPaySlip> {
                     }
                   }
                   _refreshData(); // Cập nhật dữ liệu sau khi chỉnh sửa
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Không tồn tại phiếu mượn này'),
+                  ));
                 }
               },
               child: Text('Cập Nhật'),
             ),
+
+
           ],
         );
       },

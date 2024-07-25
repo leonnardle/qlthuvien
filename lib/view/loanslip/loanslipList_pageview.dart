@@ -146,12 +146,9 @@ class _ListBookTypeState extends State<ListLoanSlip> {
         );
       },
     ).then((result) {
-      if (result == true) {
         _refreshData();
-      }
     });
   }
-
   void _showEditDialog(BuildContext context, LoanSlip loanSlip) async {
     late TextEditingController madocgiaController = TextEditingController(text: loanSlip.readerId);
     late TextEditingController _bookIdsController = TextEditingController(text: loanSlip.bookList.map((e) => e.id).join(', '));
@@ -214,8 +211,8 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                       loanSlip.listBookIds = validBookIds;
                       bool result=await updateLoanslip(loanSlip);
                       if(result&&mounted){
-                        _refreshData();
                         Navigator.pop(context, true);
+                        _refreshData();
                       }else{
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('không thể chỉnh sửa đã có phiếu trả tương ứng cho phiếu mượn này'),
