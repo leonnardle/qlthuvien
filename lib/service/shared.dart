@@ -72,7 +72,6 @@ class ShareService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('login_detail'); // Xóa dữ liệu khỏi SharedPreferences
         Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
-
       } else {
         await APICacheManager().deleteCache("login_detail"); // Xóa dữ liệu khỏi cache
         Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
