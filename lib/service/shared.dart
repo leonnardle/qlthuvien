@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:luanvan/view/login_pageview.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/login_reponse_model.dart';
+import '../model/reader_model.dart';
 
 class ShareService {
   static Future<bool> isLogged() async {
@@ -32,6 +33,8 @@ class ShareService {
         if (prefs.containsKey('login_detail')) {
           final cacheData = prefs.getString('login_detail')!;
           final decodedData = jsonDecode(cacheData) as Map<String, dynamic>;
+          print('Decoded data: $decodedData');
+
           return LoginReponseModel.fromJson(decodedData);
         }
       } else {
@@ -39,6 +42,7 @@ class ShareService {
         if (isKeyExist) {
           var cacheData = await APICacheManager().getCacheData("login_detail");
           final decodedData = jsonDecode(cacheData.syncData) as Map<String, dynamic>;
+          print('Decoded data: $decodedData');
           return LoginReponseModel.fromJson(decodedData); // Chuyển đổi JSON thành đối tượng
         }
       }
@@ -81,3 +85,20 @@ class ShareService {
     }
   }
 }
+void someFunction(Function(Reader?) onReaderRetrieved) async {
+  try {
+    LoginReponseModel? loginResponse = await ShareService.loginDetails();
+
+    if (loginResponse != null && loginResponse.data != null) {
+      Reader? reader = loginResponse.data!.reader;
+      onReaderRetrieved(reader);
+    } else {
+      print('No user is logged in');
+      onReaderRetrieved(null); // Có thể trả về null nếu không có người dùng đăng nhập
+    }
+  } catch (e) {
+    print("Error retrieving login details: $e");
+    onReaderRetrieved(null); // Trả về null trong trường hợp lỗi
+  }
+}
+

@@ -10,11 +10,13 @@ import 'package:luanvan/config.dart';
 import 'package:luanvan/function/checkValidate.dart';
 import 'package:luanvan/model/login_request_model.dart';
 import 'package:luanvan/service/api_service.dart';
+import 'package:luanvan/view/forgot_screen.dart';
 import 'package:luanvan/view/home_pageview.dart';
+import 'package:luanvan/view/reader_homepage.dart';
+import 'package:luanvan/view/register_pageview.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,6 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   String? username;
   String? password;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -89,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
           }, (onSaved) {
             username = onSaved;
           },
-              initialValue: "trungquocle636@gmail.com",
+              initialValue: "trungquocle0507@gmail.com",
               borderFocusColor: Colors.white,
               borderColor: Colors.white,
               textColor: Colors.white,
@@ -111,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
             (onSaved) {
               password = onSaved;
             },
-            initialValue: "123456",
+            initialValue: "00000000",
             borderFocusColor: Colors.white,
             borderColor: Colors.white,
             textColor: Colors.white,
@@ -147,7 +150,8 @@ class _LoginPageState extends State<LoginPage> {
                               decoration: TextDecoration.underline),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              print('entered');
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => ForgotPasswordScreen(),));
+
                             }),
                     ]),
               ),
@@ -160,23 +164,52 @@ class _LoginPageState extends State<LoginPage> {
               child: FormHelper.submitButton(
             "đăng nhập",
             () {
-              if(FormValidator.checkValidateAndSave(globalFormKey)){
+              if (FormValidator.checkValidateAndSave(globalFormKey)) {
                 setState(() {
-                  isAPIcallProcess=false;
+                  isAPIcallProcess = true;
+                });
+
+                LoginRequestModel model =
+                    LoginRequestModel(email: username, password: password);
+
+                APIService.login(model).then((response) {
+                  setState(() {
+                    isAPIcallProcess = false;
+                  });
+
+                  if (response != null) {
+                    String role =
+                        response.data?.role ?? ''; // Lấy role từ response.data
+                    if (role == 'admin') {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => MyHomePage()),
+                        (route) => false, // Xóa tất cả các trang trước đó
+                      );
+                    } else {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => CustomerHomePage()),
+                        (route) => false,
+                      );
+                    }
+                  }
+                }).catchError((error) {
+                  setState(() {
+                    isAPIcallProcess = false;
+                  });
+                  FormHelper.showSimpleAlertDialog(
+                    context,
+                    ConFig.appName,
+                    "Đã xảy ra lỗi: $error",
+                    "OK",
+                    () {
+                      Navigator.pop(context);
+                    },
+                  );
                 });
               }
-              LoginRequestModel model=LoginRequestModel(email: username,password: password);
-
-              APIService.login(model).then((reponse) => {
-                if(reponse){
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage()),)
-                }else{
-                  FormHelper.showSimpleAlertDialog(
-                      context, ConFig.appName, "email/password khong hop le", "OK", (){
-                    Navigator.pop(context);
-                  })
-                }
-              });
             },
             btnColor: HexColor("#283B71"),
             borderRadius: 10,
@@ -210,7 +243,7 @@ class _LoginPageState extends State<LoginPage> {
                             decoration: TextDecoration.underline),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            Navigator.pushNamed(context, "/register");
+                            Navigator.push(context,MaterialPageRoute(builder: (context) => RegisterPage(),) );
                           }),
                   ]),
             ),

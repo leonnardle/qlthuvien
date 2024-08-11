@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:luanvan/config.dart';
 import 'package:luanvan/function/checkValidate.dart';
 import 'package:luanvan/model/book_model.dart';
 
@@ -26,29 +29,28 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
   late TextEditingController _bookIdsController = TextEditingController();
 
 
+
   Future<void> _saveLoanSlip() async {
     if (FormValidator.checkValidateAndSave(loanSlipAddFormKey)) {
       List<String> validBookIds = [];
       List<String> invalidBooks = [];
       bool checkReader = await checkReaderExists(madocgia!);
-      bool checkLoanId = await checkLoanSlipExists(maphieumuon!);
 
-
-      if (checkReader && !checkLoanId) {
+      if (checkReader) {
         setState(() {
           isAPIcallProcess = true;
         });
 
-        //print("Book IDs text: ${_bookIdsController.text}");
+        // Lấy danh sách ID sách từ input
         List<String> bookIds = _bookIdsController.text.split(',').map((line) => line.trim()).toList();
-       // print("Book IDs list: $bookIds");
         bookIds.removeWhere((id) => id.isEmpty);
-        //print("Book IDs list after removing empty entries: $bookIds");
 
         try {
+          // Kiểm tra sự tồn tại của sách
           List<Future<bool>> checkExistenceFutures = bookIds.map((id) => checkBookExists(id)).toList();
           List<bool> existResults = await Future.wait(checkExistenceFutures);
 
+          // Phân loại ID sách hợp lệ và không hợp lệ
           bookIds.asMap().forEach((index, id) {
             if (existResults[index]) {
               validBookIds.add(id);
@@ -57,23 +59,69 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
             }
           });
 
+          // Kiểm tra sách không tồn tại
           if (invalidBooks.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text('Những sách sau không tồn tại: ${invalidBooks.join(', ')}'),
             ));
           } else {
-            LoanSlip loanSlip = LoanSlip()
-              ..id = maphieumuon!
-              ..readerId = madocgia!
-              ..loanDay = DateTime.now()
-              ..listBookIds = validBookIds;
+            // Kiểm tra phiếu mượn chưa trả
+            final response = await http.get(Uri.parse('http://192.168.1.17:3000/phieumuon/check/$madocgia'));
 
-            print("Valid Book IDs Length: ${validBookIds.length}");
-            print("LoanSlip ListBookIds Length: ${loanSlip.listBookIds.length}");
+            if (response.statusCode == 200) {
+              final List<dynamic> data = json.decode(response.body);
 
-            await insertLoanslip(loanSlip);
-            if (mounted) {
-              Navigator.pop(context, true);
+              if (data.isNotEmpty) {
+                // Hiện dialog nếu có phiếu mượn chưa trả
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('Có phiếu mượn chưa trả'),
+                      content: Text('Độc giả này có phiếu mượn chưa trả. Bạn có muốn tiếp tục không?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Đóng dialog
+                          },
+                          child: Text('Không'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.of(context).pop(); // Đóng dialog
+                            // Tiến hành thêm phiếu mượn
+                            LoanSlip loanSlip = LoanSlip()
+                              ..readerId = madocgia!
+                              ..loanDay = DateTime.now()
+                              ..listBookIds = validBookIds;
+
+                            await insertLoanslip(loanSlip);
+                            if (mounted) {
+                              Navigator.pop(context, true);
+                            }
+                          },
+                          child: Text('Có'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                // Không có phiếu mượn chưa trả, tiến hành thêm phiếu mượn
+                LoanSlip loanSlip = LoanSlip()
+                  ..readerId = madocgia!
+                  ..loanDay = DateTime.now()
+                  ..listBookIds = validBookIds;
+
+                await insertLoanslip(loanSlip);
+                if (mounted) {
+                  Navigator.pop(context, true);
+                }
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Đã xảy ra lỗi khi kiểm tra phiếu mượn.'),
+              ));
             }
           }
         } catch (error) {
@@ -134,7 +182,7 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('mã phieu muon'),
+         /*         Text('mã phieu muon'),
                   FormHelper.inputFieldWidget(context, "mã phieu muon", "mã phieu muon",
                           (onValiDate) {
                         if (onValiDate.isEmpty) {
@@ -147,7 +195,7 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
                       borderColor: Colors.white,
                       textColor: Colors.black,
                       hintColor: Colors.black,
-                      borderRadius: 10),
+                      borderRadius: 10),*/
                   SizedBox(height: 10),
                   Text('ma doc gia'),
                   FormHelper.inputFieldWidget(

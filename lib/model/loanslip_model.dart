@@ -66,11 +66,6 @@ class LoanSlip {
     return loanSlip;
   }
 
-  // Hàm để chuyển đổi ngày thành định dạng yy-MM-dd
-  String get formattedLoanDay {
-    return DateFormat('yy-MM-dd').format(_loanDay);
-  }
-
   @override
   String toString() {
     return 'LoanSlip{_id: $_id, _readerId: $_readerId, _status: $_status, _loanDay: $_loanDay, _listBookIds: $_listBookIds, _bookList: $_bookList}';

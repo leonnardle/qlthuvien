@@ -1,8 +1,12 @@
 import 'dart:convert';
 
+import 'package:luanvan/model/reader_model.dart';
+
+// Hàm để giải mã JSON thành đối tượng LoginReponseModel
 LoginReponseModel loginReponseJson(String str) =>
     LoginReponseModel.fromJson(json.decode(str));
 
+// Hàm để mã hóa đối tượng LoginReponseModel thành JSON
 String loginReponseToJson(LoginReponseModel data) => json.encode(data.toJson());
 
 class LoginReponseModel {
@@ -35,14 +39,17 @@ class Data {
   int? id;
   String? email;
   String? password;
-
-  Data({this.id, this.email, this.password});
+  String? role;
+  Reader? reader;
+  Data({this.id, this.email, this.password, this.role,this.reader});
 
   factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
       id: json['id'],
       email: json['email'],
       password: json['password'],
+      role: json['role'], // Gán giá trị cho role
+      reader: json['reader'] != null ? Reader.fromJson(json['reader']) : null, // Gán giá trị cho reader
     );
   }
 
@@ -51,6 +58,10 @@ class Data {
     data['id'] = this.id;
     data['email'] = this.email;
     data['password'] = this.password;
+    data['role'] = this.role; // Thêm role vào JSON
+    if (this.reader != null) {
+      data['reader'] = this.reader!.toJson(); // Chuyển đổi reader thành JSON
+    }
     return data;
   }
 }

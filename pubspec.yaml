@@ -51,7 +51,7 @@ dev_dependencies:
   universal_io: ^2.0.4
   provider: ^6.1.2
   intl: ^0.19.0
-
+  badges: ^3.1.2
 
 
   # The "flutter_lints" package below contains a set of recommended lints to

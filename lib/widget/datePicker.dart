@@ -11,7 +11,6 @@ class _DatePickerDemoState extends State<DatePickerDemo> {
   DateTime? _selectedDate;
 
   Future<void> _selectDate(BuildContext context) async {
-    // Hiển thị hộp thoại chọn ngày
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate ?? DateTime.now(),

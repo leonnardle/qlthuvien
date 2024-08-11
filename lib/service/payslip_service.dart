@@ -6,14 +6,10 @@ import 'package:luanvan/config.dart';
 import 'package:luanvan/model/payslip_model.dart';
 
 import '../model/book_model.dart';
-
-
-
 List<PaySlip> parsePaySlip(String responseBody) {
   final parsed = json.decode(responseBody)['data'] as List<dynamic>;
   return parsed.map<PaySlip>((json) => PaySlip.fromJson(json)).toList();
 }
-
 Future<List<PaySlip>> fetchPaySlip() async {
   try {
     final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieutra/'));
@@ -56,7 +52,7 @@ Future<bool> insertPaySlip(PaySlip paySlip) async {
       body: jsonEncode({
         'mapt': paySlip.id,
         'maphieumuon': paySlip.loanId,
-        'ngaytra': paySlip.payDay.toIso8601String().split('T')[0], //format ngay
+        'ngaytra': paySlip.payDay.toIso8601String().split('T').join(' ').substring(0, 16), // format ngày và giờ
         'ghichu': paySlip.note,
         "masachList":paySlip.listBookIds
       }),

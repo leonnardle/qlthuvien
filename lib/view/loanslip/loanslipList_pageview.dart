@@ -8,6 +8,7 @@ import 'package:luanvan/view/payslip/payslipAdd_pageview.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:snippet_coder_utils/hex_color.dart';
+import '../../function/convertTimeToGMT7.dart';
 import '../../service/book_service.dart';
 import '../../service/reader_service.dart';
 import '../../widget/addButton.dart';
@@ -24,18 +25,60 @@ class ListLoanSlip extends StatefulWidget {
 }
 
 class _ListBookTypeState extends State<ListLoanSlip> {
+  final TextEditingController _searchController = TextEditingController();
+  List<LoanSlip> _allBookTypes = [];
+  List<LoanSlip> _filteredLoanSlip = [];
+  Future<void> _fetchLoanSlip() async {
+    try {
+      final bookTypes = await fetchLoanslip();
+      setState(() {
+        _allBookTypes = bookTypes;
+      });
+    } catch (e) {
+      // Xu ly su kien neu loi
+    }
+  }
 
-  /* @override
+  void _filterLoanSlip() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredLoanSlip = _allBookTypes.where((bookType) {
+        final nameLower = bookType.id.toLowerCase();
+        return nameLower.contains(query);
+      }).toList();
+    });
+  }
+   @override
   void initState() {
     super.initState();
-    _booktypeFuture = fetchBookType();
-  }*/
+    //_booktypeFuture = fetchBookType();
+
+    _fetchLoanSlip();
+    _searchController.addListener(() {
+      _filterLoanSlip();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Danh Sách phieu muon'),
+        actions: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 300), // Optional: Constrain width
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm theo mã...',
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       body: FutureBuilder<List<LoanSlip>>(
           future: widget.LoanSlipFuture,
@@ -43,15 +86,18 @@ class _ListBookTypeState extends State<ListLoanSlip> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
+              print(snapshot.error);
               return Center(child: Text('Lỗi khi tải phieu muon: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('Không có phieu muon nao'));
             } else {
-              final  LoanSlipsList=snapshot.data!;
+              final loanSlipsList = _filteredLoanSlip.isNotEmpty
+                  ? _filteredLoanSlip
+                  : snapshot.data!;
               return ListView.builder(
-                itemCount: LoanSlipsList.length,
+                itemCount: loanSlipsList.length,
                 itemBuilder: (context, index) {
-                  LoanSlip loanSlip = LoanSlipsList[index];
+                  LoanSlip loanSlip = loanSlipsList[index];
                   return GestureDetector(
                     child: Card(
                       margin:
@@ -78,7 +124,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                                   SizedBox(height: 4),
                                   Text('danh sách sách : ${loanSlip.bookList.map((e) => e.name).join(', ')}'),
                                   SizedBox(height: 4),
-                                  Text('ngay muon : ${loanSlip.loanDay}'),
+                                  Text('Ngày muon: ${formatDateTimeToLocal(loanSlip.loanDay)}'),
                                   SizedBox(height: 4),
                                   Text('trang thai : ${loanSlip.status==true?"da tra":"chua tra"}'),
                                 ],
@@ -109,7 +155,8 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                             ),
                             IconButton(
                               onPressed: () {
-                                _showReturnSlipDialog(context, loanSlip);
+                                _showPaySlipDialog(context, loanSlip);
+                                _refreshData();
                               },
                               icon: Icon(Icons.library_add_check_sharp),
                             ),
@@ -136,7 +183,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
       ),
     );
   }
-  void _showReturnSlipDialog(BuildContext context, LoanSlip loanSlip) {
+  void _showPaySlipDialog(BuildContext context, LoanSlip loanSlip) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

@@ -75,10 +75,7 @@ class PaySlip {
     return loanSlip;
   }
 
-  // Hàm để chuyển đổi ngày thành định dạng yy-MM-dd
-  String get formattedLoanDay {
-    return DateFormat('yy-MM-dd').format(_payDay);
-  }
+
 
 
 }

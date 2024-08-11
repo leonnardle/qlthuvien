@@ -9,7 +9,6 @@ class Book {
   String _id = '';
   String _name = '';
   String _description = '';
-  int _quantity = 0;
   Image? _image;
   String? _imageBase64;
   List<String> _listPublisherIds = [];
@@ -18,12 +17,13 @@ class Book {
   List<BookType> _bookTypeList = [];
   List<String> _listAuthorIds = [];
   List<Author> _authorList = [];
+  int _trangthai = 1; // Thêm thuộc tính trạng thái
+
   String get id => _id;
   set id(String value) => _id = value;
 
   String get name => _name;
   set name(String value) => _name = value;
-
 
   List<String> get listBookTypeIds => _listBookTypeIds;
   set listBookTypeIds(List<String> value) => _listBookTypeIds = value;
@@ -37,23 +37,24 @@ class Book {
   String get description => _description;
   set description(String value) => _description = value;
 
-  int get quantity => _quantity;
-  set quantity(int value) => _quantity = value;
-
   Image? get image => _image;
   set image(Image? value) => _image = value;
 
   String? get imageBase64 => _imageBase64;
   set imageBase64(String? value) => _imageBase64 = value;
 
-  List<Publisher> get publishersList => _publishersList;  // Thêm getter và setter cho danh sách nhà xuất bản
+  List<Publisher> get publishersList => _publishersList;
   set publishersList(List<Publisher> value) => _publishersList = value;
 
-  List<BookType> get bookTypeList => _bookTypeList;  // Thêm getter và setter cho danh sách nhà xuất bản
+  List<BookType> get bookTypeList => _bookTypeList;
   set bookTypeList(List<BookType> value) => _bookTypeList = value;
 
-  List<Author> get listauthor => _authorList;  // Thêm getter và setter cho danh sách tac gia
+  List<Author> get listauthor => _authorList;
   set listauthor(List<Author> value) => _authorList = value;
+
+  int get trangthai => _trangthai;  // Getter cho trạng thái
+  set trangthai(int value) => _trangthai = value;  // Setter cho trạng thái
+
   Book();
 
   factory Book.fromJson(Map<String, dynamic> data) {
@@ -73,16 +74,11 @@ class Book {
     return Book()
       ..id = data['masach'] ?? ''
       ..name = data['tensach'] ?? ''
-      //..listPublisherIds = List<String>.from(data['manxbList'] ?? [])
       ..description = data['mota'] ?? ''
-      ..quantity = data['soluong'] ?? 0
       ..image = image
       ..imageBase64 = imageBase64
-      //..listBookTypeIds = List<String>.from(data['manloaiList'] ?? [])
-      //..listAuthorIds = List<String>.from(data['mantgList'] ?? [])
-    ;  // Cập nhật ở đây
+      ..trangthai = int.tryParse(data['trangthai'].toString()) ?? 1;
   }
-
 
   Future<void> pickImage() async {
     final imagePickerHelper = ImagePickerHelper();

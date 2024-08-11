@@ -48,7 +48,7 @@ Future<void> insertReader(Reader reader) async {
     print('Đã xảy ra lỗi khi gửi yêu cầu thêm docgia: $e');
   }
 }
-Future<void> updateReader(Reader reader) async {
+Future<bool> updateReader(Reader reader) async {
   try {
     final response = await http.put(Uri.parse('${ConFig.apiUrl}/docgia/${reader.id}'),
       headers: {
@@ -67,13 +67,17 @@ Future<void> updateReader(Reader reader) async {
     print('Trạng thái phản hồi: ${response.statusCode}');
     print('Nội dung phản hồi: ${response.body}');*/
     if (response.statusCode == 200) {
-      fetchReader();
+      //fetchReader();
+      return true;
     } else {
       print('Đã xảy ra lỗi khi cập nhật loại sách cho ${reader.id}');
+      return false;
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu cập nhật loại sách: $e');
+    return false;
   }
+
 }
 Future<bool> deleteReader(Reader book) async {
   try {
@@ -105,3 +109,4 @@ Future<bool> checkReaderExists(String readerId) async {
     return false;
   }
 }
+

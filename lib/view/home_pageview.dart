@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:luanvan/model/book_model.dart';
@@ -12,19 +14,22 @@ import 'package:luanvan/service/loanSlip_service.dart';
 import 'package:luanvan/service/payslip_service.dart';
 import 'package:luanvan/service/publisher_service.dart';
 import 'package:luanvan/service/reader_service.dart';
-
+import 'package:http/http.dart' as http;
 import 'package:luanvan/view/author/authorList_pageview.dart';
 import 'package:luanvan/view/loanslip/loanslipList_pageview.dart';
 import 'package:luanvan/view/payslip/payslipList_pageview.dart';
 import 'package:luanvan/view/publisher/publisherList_pageview.dart';
 import 'package:luanvan/view/reader/readerList_pageview.dart';
 
+import '../config.dart';
 import '../service/shared.dart';
 import 'package:luanvan/model/author_model.dart';
 import 'package:luanvan/service/author_service.dart';
+import 'package:badges/badges.dart' as badges;
 
 import 'package:luanvan/view/booktype/booktypeList_pageview.dart';
 import '../view/book/booklist_pageview.dart';
+import 'PendingRequestsPage.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -35,10 +40,40 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   Widget _content = Center(child: Text('Chọn một mục từ Menu'));
+
   void _setContent(Widget content) {
     setState(() {
       _content = content;
     });
+  }
+
+  int loanSlipCount = 0;
+  // đếm số đơn mượn được gửi tới
+  Future<int> fetchLoanSlipCount() async {
+    final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuondangchoduyet/count'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonData = json.decode(response.body);
+      return jsonData['count'];
+    } else {
+      throw Exception('Failed to load loan slip count');
+    }
+  }
+  void _getLoanSlipCount() async {
+    try {
+      int count = await fetchLoanSlipCount();
+      print("số lượng hien tại của phiếu mượn đang chờ là $count");
+
+      setState(() {
+        loanSlipCount = count;
+      });
+    } catch (e) {
+      print('Error fetching loan slip count: $e');
+    }
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    _getLoanSlipCount();
   }
 
   @override
@@ -47,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
       drawer: NavBar(
         onItemSelected: (Widget content) {
           _setContent(content);
-          Navigator.pop(context); // Đóng Drawer sau khi chọn
+          Navigator.pop(context);
         },
       ),
       appBar: AppBar(
@@ -58,7 +93,21 @@ class _MyHomePageState extends State<MyHomePage> {
               ShareService.logout(context);
             },
             icon: const Icon(Icons.logout),
-          )
+          ),
+          badges.Badge(
+            badgeContent: Text(
+              loanSlipCount.toString(),
+              style: TextStyle(color: Colors.white),
+            ),
+            position: badges.BadgePosition.topEnd(top: 0, end: 10),
+            child: IconButton(
+              onPressed: () {
+                _getLoanSlipCount();
+                _setContent(PendingRequestsPage(onUpdateLoanSlipCount:_getLoanSlipCount ,));
+              },
+              icon: const Icon(Icons.receipt),
+            ),
+          ),
         ],
       ),
       body: _content,
@@ -132,8 +181,8 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text('Quản Lý Đọc Giả'),
             onTap: () async {
-              Future<List<Reader>> list =  fetchReader();
-              onItemSelected(ListReader(readerFuture: list));
+              //Future<List<Reader>> list =  fetchReader();
+              onItemSelected(ListReader());
             },
           ),
           ListTile(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart'as http;
 import 'package:luanvan/config.dart';
 import 'package:luanvan/model/login_reponse_model.dart';
@@ -7,22 +8,33 @@ import 'package:luanvan/model/login_request_model.dart';
 import 'package:luanvan/model/register_request_model.dart';
 import 'package:luanvan/model/register_response_model.dart';
 import 'package:luanvan/service/shared.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 class APIService{
   static var client=http.Client();
-  static Future<bool> login(LoginRequestModel model) async {
-    Map<String,String> requestHeader={
-      'Content-Type':'application/json'
+
+  static Future<LoginReponseModel> login(LoginRequestModel model) async {
+    Map<String, String> requestHeader = {
+      'Content-Type': 'application/json'
     };
-    var url = Uri.parse('${ConFig.apiUrl}${ConFig.loginAPI}');
-    var reponse=await client.post(url,headers: requestHeader,body: jsonEncode(model.toJson()));
-    if(reponse.statusCode==200){
-      await ShareService.setLoginDetail(loginReponseJson(reponse.body));
-      return true;
-    }else{
-      print(reponse.body);
-      return false;
+
+    String url;
+
+    if (kIsWeb) {
+      url = 'http://localhost:3000/user/login'; // Web
+    } else {
+      url = 'http://192.168.1.17:3000/user/login'; // Di động
+    }
+
+    var response = await client.post(Uri.parse(url), headers: requestHeader, body: jsonEncode(model.toJson()));
+
+    if (response.statusCode == 200) {
+      await ShareService.setLoginDetail(loginReponseJson(response.body));
+      return loginReponseJson(response.body);
+    } else {
+      throw Exception('Failed to login');
     }
   }
+
   static Future<RegisterReponseModel> register(RegisterRequestModel model) async {
     Map<String,String> requestHeader={
       'Content-Type':'application/json'

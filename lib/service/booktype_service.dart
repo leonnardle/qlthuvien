@@ -71,7 +71,7 @@ Future<void> updateBooktype(BookType book) async {
     print('Đã xảy ra lỗi khi gửi yêu cầu cập nhật loại sách: $e');
   }
 }
-Future<void> deleteBooktype(BookType book) async {
+Future<bool> deleteBooktype(BookType book) async {
   try {
     final response =  await http.delete(
         Uri.parse('${ConFig.apiUrl}/booktype/${book.id}'),
@@ -85,12 +85,17 @@ Future<void> deleteBooktype(BookType book) async {
 
     if (response.statusCode == 200) {
       print('Đã xóa loại sách thành công');
+      return true;
 
     } else {
       print('Đã xảy ra lỗi khi xóa loại sách cho ${book.id}');
+      return false;
+
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu xóa loại sách: $e');
+    return false;
+
   }
 }
 

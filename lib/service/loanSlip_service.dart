@@ -52,9 +52,8 @@ Future<void> insertLoanslip(LoanSlip loanSlip) async {
         'Accept': 'application/json',
       },
       body: jsonEncode({
-        'mapm': loanSlip.id,
         'madocgia': loanSlip.readerId,
-        'ngaymuon': loanSlip.loanDay.toIso8601String().split('T')[0], //format ngay
+        'ngaymuon': loanSlip.loanDay.toIso8601String().split('T').join(' ').substring(0, 16), // format ngày và giờ
         'trangthai': loanSlip.status,
         "masachList":loanSlip.listBookIds
       }),
@@ -64,12 +63,12 @@ Future<void> insertLoanslip(LoanSlip loanSlip) async {
     print('Trạng thái phản hồi: ${response.statusCode}');
     print('Nội dung phản hồi: ${response.body}');*/
     if (response.statusCode == 200) {
-      print('Đã thêm doc gia thành công');
+      print('Đã thêm phieu muon thành công');
     } else {
-      print('Đã xảy ra lỗi khi thêm docgia. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
+      print('Đã xảy ra lỗi khi thêm phieu muon. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
     }
   } catch (e) {
-    print('Đã xảy ra lỗi khi gửi yêu cầu thêm docgia: $e');
+    print('Đã xảy ra lỗi khi gửi yêu cầu thêm phieu muon: $e');
   }
 }
 Future<bool> updateLoanslip(LoanSlip loanSlip) async {
@@ -143,3 +142,15 @@ Future<List<Book>> fetchBooksByLoanSlip(String publisherId) async {
     throw Text('không tìm thấy sách nào từ phiếu mượn này');
   }
 }
+// kiem tra co phieu muon nao chua tra khong
+/*
+Future<bool> checkUnreturnedLoans(String readerId) async {
+  final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/check/$readerId'));
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    // Kiểm tra xem có phiếu mượn nào với trạng thái 0
+    return data.any((loan) => loan['trangthai'] == 0); // Giả sử 'trangthai' là tên cột
+  } else {
+    throw Exception('Không thể kiểm tra phiếu mượn');
+  }
+}*/

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:luanvan/service/shared.dart';
 import 'package:luanvan/view/home_pageview.dart';
 import 'package:luanvan/view/login_pageview.dart';
-import 'package:luanvan/view/register_pageview.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

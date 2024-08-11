@@ -45,7 +45,9 @@ class _AddAuthorState extends State<AddAuthor> {
       }
       try{
         await insertAuthor(author);
-
+        if(mounted) {
+          Navigator.pop(context, true);
+        }
       }catch(error){
 
       }finally{

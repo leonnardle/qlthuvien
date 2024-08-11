@@ -14,7 +14,8 @@ List<Book> parseBook(String responseBody) {
 }
 Future<List<Book>> fetchBooks() async {
   try {
-    final response = await http.get(Uri.parse('${ConFig.apiUrl}/sach/'));
+    final apiUrl = getApiUrl();
+    final response = await http.get(Uri.parse('$apiUrl/sach/'));
     if (response.statusCode == 200) {
       List<Book> books = parseBook(response.body);
 
@@ -46,7 +47,7 @@ Future<List<Book>> fetchBooks() async {
           } else {
             print('Failed to load book type for book ${book.id}');
           }
-          
+
           final authorResponse=await http.get(Uri.parse('${ConFig.apiUrl}/sach/${book.id}/danhsachtacgia'));
           if(authorResponse.statusCode==200){
             final authorData=jsonDecode(authorResponse.body)['data'];
@@ -78,8 +79,9 @@ Future<List<Book>> fetchBooks() async {
   }
 }
 Future<void> insertBook(Book book) async {
+
   final response = await http.post(
-    Uri.parse('http://192.168.1.17:3000/sach'),
+    Uri.parse('http://localhost:3000/sach'),
     headers: {'Content-Type': 'application/json'},
     body: json.encode({
       'masach': book.id,
@@ -89,7 +91,6 @@ Future<void> insertBook(Book book) async {
       'matacgiaList': book.listAuthorIds,
       'mota': book.description,
       'hinhanh': book.imageBase64,
-      'soluong': book.quantity
     }),
   );
 
@@ -101,7 +102,7 @@ Future<void> insertBook(Book book) async {
 }
 Future<void> updateBook(Book book, List<String> manxbList,List<String> manloaiList,List<String> matgList) async {
   final response = await http.put(
-    Uri.parse('http://192.168.1.17:3000/sach/${book.id}'),
+    Uri.parse('http://localhost:3000/sach/${book.id}'),
     headers: {'Content-Type': 'application/json'},
     body: json.encode({
       'masach': book.id,
@@ -111,7 +112,6 @@ Future<void> updateBook(Book book, List<String> manxbList,List<String> manloaiLi
       'matacgiaList': matgList,
       'mota': book.description,
       'hinhanh': book.imageBase64,
-      'soluong': book.quantity
     }),
   );
 
@@ -121,11 +121,12 @@ Future<void> updateBook(Book book, List<String> manxbList,List<String> manloaiLi
 }
 Future<bool> deleteBook(String id) async {
   final response = await http.delete(
-    Uri.parse('http://192.168.1.17:3000/sach/$id'),
+    Uri.parse('http://localhost:3000/sach/$id'),
   );
 
   if (response.statusCode != 200) {
-    throw Exception('Không thể xóa sách');
+    return false;
+
   }else{
     return true;
   }

@@ -7,6 +7,7 @@ import 'package:luanvan/service/loanSlip_service.dart';
 import 'package:luanvan/service/payslip_service.dart';
 import 'package:luanvan/view/payslip/payAdd_pageview.dart';
 
+import '../../function/convertTimeToGMT7.dart';
 import '../../model/payslip_model.dart';
 import '../../service/book_service.dart';
 import '../../widget/addButton.dart';
@@ -22,18 +23,60 @@ class ListPaySlip extends StatefulWidget {
 }
 
 class _ListPaySlipState extends State<ListPaySlip> {
+  final TextEditingController _searchController = TextEditingController();
+  List<PaySlip> _allBookTypes = [];
+  List<PaySlip> _filteredPaySlip = [];
+  Future<void> _fetchPaySlip() async {
+    try {
+      final bookTypes = await fetchPaySlip();
+      setState(() {
+        _allBookTypes = bookTypes;
+      });
+    } catch (e) {
+      // Xu ly su kien neu loi
+    }
+  }
 
-  /* @override
+  void _filterPaySlip() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredPaySlip = _allBookTypes.where((bookType) {
+        final nameLower = bookType.id.toLowerCase();
+        return nameLower.contains(query);
+      }).toList();
+    });
+  }
+   @override
   void initState() {
     super.initState();
-    _booktypeFuture = fetchBookType();
-  }*/
+    //_booktypeFuture = fetchBookType();
+    _fetchPaySlip();
+    _searchController.addListener(() {
+      _filterPaySlip();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Danh Sách phieu tra'),
+        actions: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 300), // Optional: Constrain width
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm theo mã...',
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+        ],
+
       ),
       body: FutureBuilder<List<PaySlip>>(
           future: widget.PaySlipFuture,
@@ -45,7 +88,9 @@ class _ListPaySlipState extends State<ListPaySlip> {
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('Không có phieu tra nao'));
             } else {
-              final  PaySlipsList=snapshot.data!;
+              final PaySlipsList = _filteredPaySlip.isNotEmpty
+                  ? _filteredPaySlip
+                  : snapshot.data!;
               return ListView.builder(
                 itemCount: PaySlipsList.length,
                 itemBuilder: (context, index) {
@@ -74,7 +119,7 @@ class _ListPaySlipState extends State<ListPaySlip> {
                                   SizedBox(height: 4),
                                   Text('ma phieu muon : ${paySlip.loanId}'),
                                   SizedBox(height: 4),
-                                  Text('ngay tra : ${paySlip.payDay}'),
+                                  Text('Ngày trả: ${formatDateTimeToLocal(paySlip.payDay)}'),
                                   SizedBox(height: 4),
                                   Text('ghi chu : ${paySlip.note}'),
                                   SizedBox(height: 4),

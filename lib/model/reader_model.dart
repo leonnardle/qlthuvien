@@ -22,9 +22,6 @@ class Reader {
   set name(String value) {
     _name = value;
   }
-
-
-
   String get email => _email;
 
   set email(String value) {

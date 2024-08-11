@@ -64,7 +64,7 @@ class _ListBookTypeState extends State<ListBookType> {
               child: TextField(
                 controller: _searchController,
                 decoration: const InputDecoration(
-                  hintText: 'Tìm kiếm...',
+                  hintText: 'Tìm kiếm theo tên loại...',
                   border: InputBorder.none,
                 ),
               ),
@@ -124,8 +124,15 @@ class _ListBookTypeState extends State<ListBookType> {
                             onPressed: () {
                               showDeleteConfirmationDialog(context, (confirm) async {
                                 if (confirm) {
-                                  await deleteBooktype(bookTypesList[index]);
-                                  _fetchBookTypes(); // Cập nhật dữ liệu sau khi xóa
+                                  bool result=await deleteBooktype(bookTypesList[index]);
+                                  if(result) {
+                                    _fetchBookTypes();
+                                  }else {
+                                      if(mounted){
+                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(''
+                                            'không thể xóa , vì đã có sách chứa mã loại này')));
+                                      }
+                                  }
                                 }
                               });
                             },
@@ -148,7 +155,7 @@ class _ListBookTypeState extends State<ListBookType> {
             context,
             MaterialPageRoute(builder: (context) => AddBookType()),
           );
-          if (result) {
+          if (result!=null&&result==true) {
             _fetchBookTypes();
           }
         },

@@ -19,7 +19,7 @@ import '../../widget/navbar.dart';
 import 'bookAdd_pageview.dart';
 
 class ListBook extends StatefulWidget {
-  late Future<List<Book>>? booksFuture;  // Chuyển Future vào constructor
+  late Future<List<Book>>? booksFuture;
 
   ListBook({Key? key,  this.booksFuture}) : super(key: key);
 
@@ -27,14 +27,40 @@ class ListBook extends StatefulWidget {
   _ListBookState createState() => _ListBookState();
 }
 class _ListBookState extends State<ListBook> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Book> _allBookTypes = [];
+  List<Book> _filteredBook = [];
+  Future<void> _fetchBook() async {
+    try {
+      final bookTypes = await fetchBooks();
+      setState(() {
+        _allBookTypes = bookTypes;
+        _filteredBook = bookTypes;
+      });
+    } catch (e) {
+      // Xu ly su kien neu loi
+    }
+  }
 
+  void _filterBook() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredBook = _allBookTypes.where((bookType) {
+        final nameLower = bookType.name.toLowerCase();
+        return nameLower.contains(query);
+      }).toList();
+    });
+  }
   @override
-/*
+
   void initState() {
     super.initState();
-    _booksFuture = widget.booksFuture ?? fetchBooks();
-
-    Timer.periodic(const Duration(minutes: 10), (timer) async {
+    //_booksFuture = widget.booksFuture ?? fetchBooks();
+    _fetchBook();
+    _searchController.addListener(() {
+      _filterBook();
+    });
+    /*Timer.periodic(const Duration(minutes: 10), (timer) async {
       try {
         var books = await fetchBooks();
         if (mounted) {
@@ -48,15 +74,31 @@ class _ListBookState extends State<ListBook> {
           print('Lỗi khi nạp danh sách sách: $e');
         }
       }
-    });
+    });*/
   }
-*/
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Danh Sách Sách'),
+        actions: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 300), // Optional: Constrain width
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm theo tên loại...',
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+        ],
+
       ),
       body: FutureBuilder<List<Book>>(
         future: widget.booksFuture,
@@ -68,7 +110,9 @@ class _ListBookState extends State<ListBook> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Không có sách'));
           } else {
-            final books = snapshot.data!;
+            final books = _filteredBook.isNotEmpty
+                ? _filteredBook
+                : snapshot.data!;
             return ListView.builder(
               itemCount: books.length,
               itemBuilder: (context, index) {
@@ -122,8 +166,13 @@ class _ListBookState extends State<ListBook> {
                             onPressed: () {
                               showDeleteConfirmationDialog(context, (confirmed) async {
                                 if (confirmed) {
-                                  await deleteBook(book.id);
-                                  _refreshBooks();
+                                  bool result= await deleteBook(book.id);
+                                  if(result) {
+                                    _refreshBooks();
+                                  }else{
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('không thể xóa,'
+                                        'nó đã tồn tại trong 1 phiếu mượn')));
+                                  }
                                 }
                               });
                             },
