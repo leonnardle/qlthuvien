@@ -50,7 +50,6 @@ Future<bool> insertPaySlip(PaySlip paySlip) async {
         'Accept': 'application/json',
       },
       body: jsonEncode({
-        'mapt': paySlip.id,
         'maphieumuon': paySlip.loanId,
         'ngaytra': paySlip.payDay.toIso8601String().split('T').join(' ').substring(0, 16), // format ngày và giờ
         'ghichu': paySlip.note,

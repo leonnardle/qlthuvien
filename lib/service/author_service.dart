@@ -22,13 +22,12 @@ Future<List<Author>> fetchAuthor() async {
 Future<Map<String, dynamic>?> insertAuthor(Author author) async {
 
   final response = await http.post(
-    Uri.parse('http://192.168.1.17:3000/tacgia/'),  // Thay đổi URL nếu cần
+    Uri.parse('${ConFig.apiUrl}/tacgia/'),  // Thay đổi URL nếu cần
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
     body: jsonEncode({
-      "matacgia": author.id,
       "tentacgia": author.name,
       "quoctich": author.country,
       "tieusu": author.story,

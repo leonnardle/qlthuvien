@@ -28,7 +28,6 @@ class _AddReaderState extends State<AddReader> {
         isAPIcallProcess=true;
       });
       Reader reader = Reader()
-        ..id = madocgia!
         ..name = tendocgia!
         ..email=email!
         ..phoneNumber=sdt!;
@@ -91,21 +90,6 @@ class _AddReaderState extends State<AddReader> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('mã doc gia'),
-                  FormHelper.inputFieldWidget(context, "mã doc gia", "mã doc gia",
-                          (onValiDate) {
-                        if (onValiDate.isEmpty) {
-                          return ("mã doc gia không được trống");
-                        }
-                      }, (onSaved) {
-                        madocgia = onSaved;
-                      },
-                      borderFocusColor: Colors.white,
-                      borderColor: Colors.white,
-                      textColor: Colors.black,
-                      hintColor: Colors.black,
-                      borderRadius: 10),
-                  SizedBox(height: 10),
                   Text('tên doc gia'),
                   FormHelper.inputFieldWidget(
                     context,

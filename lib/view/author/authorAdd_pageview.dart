@@ -10,7 +10,6 @@ class AddAuthor extends StatefulWidget {
 
 class _AddAuthorState extends State<AddAuthor> {
   final _addAuthorKey = GlobalKey<FormState>();
-  final TextEditingController _idController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _storyController = TextEditingController();
@@ -33,7 +32,6 @@ class _AddAuthorState extends State<AddAuthor> {
       });
 
       final author = Author()
-        ..id = _idController.text
         ..name = _nameController.text
         ..country = _countryController.text
         ..story = _storyController.text
@@ -77,16 +75,6 @@ class _AddAuthorState extends State<AddAuthor> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                  controller: _idController,
-                  decoration: InputDecoration(labelText: 'Mã Tác Giả'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Mã tác giả không được để trống';
-                    }
-                    return null;
-                  },
-                ),
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(labelText: 'Tên Tác Giả'),

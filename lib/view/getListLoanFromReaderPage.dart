@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:luanvan/config.dart';
 
 import '../function/convertTimeToGMT7.dart';
 
 // Hàm để lấy danh sách phiếu mượn
 Future<List<Map<String, dynamic>>> fetchBorrowRecords(String readerId) async {
-  final response = await http.get(Uri.parse('http://192.168.1.17:3000/docgia/laydanhsach/$readerId'));
+  final response = await http.get(Uri.parse('${ConFig.apiUrl}/docgia/laydanhsach/$readerId'));
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
@@ -38,37 +39,42 @@ Widget buildBorrowRecordsTable(List<Map<String, dynamic>> borrowRecords) {
         return DataRow(cells: [
           DataCell(Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(record['mapm'], style: TextStyle(fontSize: 12)),
+            child: Text(record['mapm'] ?? 'Không có', style: TextStyle(fontSize: 12)), // Kiểm tra null
           )),
           DataCell(Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              formatDateTimeToLocal(DateTime.parse(record['ngaymuon'])),
+              record['ngaymuon'] != null
+                  ? formatDateTimeToLocal(DateTime.parse(record['ngaymuon']))
+                  : 'Không có', // Kiểm tra null
               style: TextStyle(fontSize: 12),
             ),
           )),
           DataCell(Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              formatDateTimeToLocal(DateTime.parse(record['ngaytra'])),
+              record['ngaytra'] != null
+                  ? formatDateTimeToLocal(DateTime.parse(record['ngaytra']))
+                  : 'Không có', // Kiểm tra null
               style: TextStyle(fontSize: 12),
             ),
           )),
-
           DataCell(Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(record['status'], style: TextStyle(fontSize: 12)),
+            child: Text(record['status'] ?? 'chưa trả', style: TextStyle(fontSize: 12)), // Kiểm tra null
           )),
           DataCell(Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text((record['missingBooks'] as List).join(', '), style: TextStyle(fontSize: 12)),
+            child: Text(
+              (record['missingBooks'] as List?)?.join(', ') ?? 'Không có', // Kiểm tra null
+              style: TextStyle(fontSize: 12),
+            ),
           )),
         ]);
       }).toList(),
     ),
   );
 }
-
 // Widget hiển thị danh sách phiếu mượn
 class BorrowRecordsScreen extends StatefulWidget {
   final String readerId;

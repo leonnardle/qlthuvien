@@ -59,7 +59,8 @@ class _AddReturnSlipState extends State<AddReturnSlipFromLoanpage> {
     // Thực hiện lưu phiếu trả
     bool result=await insertPaySlip(paySlip);
     if(!result&&mounted){
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('có lỗi xảy ra hoặc đã tồn tại phiếu trả cho phiếu mượn này')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(''
+          'có lỗi xảy ra hoặc đã tồn tại phiếu trả cho phiếu mượn này , hãy tiến hành chỉnh sửa phiếu trả')));
     }else {
       if(mounted) {
         Navigator.pop(context);
@@ -75,13 +76,7 @@ class _AddReturnSlipState extends State<AddReturnSlipFromLoanpage> {
           'Trả sách cho phiếu mượn: ${widget.loanSlip!.id}',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10),
-        TextField(
-          controller: _maphieutraController,
-          decoration: InputDecoration(
-            labelText: 'Mã phiếu trả',
-          ),
-        ),
+
         SizedBox(height: 10),
         TextField(
           controller: _ghichuController,

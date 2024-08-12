@@ -8,6 +8,7 @@ import 'package:luanvan/view/getListLoanFromReaderPage.dart';
 import 'package:luanvan/view/reader/EditPage.dart';
 
 import '../model/reader_model.dart';
+import 'changepassword_pageview.dart';
 
 class CartItem {
   final Book book;
@@ -139,6 +140,26 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     });
   }
 
+  Future<void> _refreshBooks() async {
+    setState(() {
+      loading = true; // Đặt trạng thái đang tải
+    });
+
+    // Gọi lại fetchBooks
+    try {
+      booksFuture = fetchBooks(); // Cập nhật booksFuture
+      await booksFuture; // Đợi cho đến khi danh sách sách được tải lại
+    } catch (error) {
+      print('Lỗi khi tải lại sách: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi tải lại sách: $error')),
+      );
+    }
+
+    setState(() {
+      loading = false; // Đặt trạng thái không còn đang tải
+    });
+  }
   void _logout() {
     ShareService.logout(context);
   }
@@ -165,7 +186,8 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
             ListTile(
               title: Text('Sửa thông tin'),
               onTap: () async {
-                if (currentReader != null) { // Kiểm tra xem currentReader có phải là null không
+                if (currentReader != null) {
+                  // Kiểm tra xem currentReader có phải là null không
                   // Xử lý sửa thông tin
                   Reader? updatedReader = await Navigator.of(context).push(
                     MaterialPageRoute(
@@ -188,9 +210,15 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
             ListTile(
               title: Text('Đổi mật khẩu'),
               onTap: () {
-                // Xử lý đổi mật khẩu
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangePasswordScreen(email: currentReader!.email),
+                  ),
+                );
               },
             ),
+
             ListTile(
               title: Text('Lịch Sử Mượn'),
               onTap: () {
@@ -208,6 +236,14 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       appBar: AppBar(
         title: Text('Danh Sách Sách'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.refresh), // Nút refresh
+            onPressed: () {
+              print('Nút refresh được nhấn'); // Kiểm tra xem nút có hoạt động không
+              _refreshBooks(); // Gọi phương thức tải lại
+            },
+          ),
+
           IconButton(
             icon: Icon(Icons.shopping_cart),
             onPressed: () {

@@ -78,13 +78,12 @@ Future<List<Book>> fetchBooks() async {
     rethrow; // Ném lỗi ra ngoài
   }
 }
-Future<void> insertBook(Book book) async {
+Future<bool> insertBook(Book book) async {
 
   final response = await http.post(
-    Uri.parse('http://localhost:3000/sach'),
+    Uri.parse('${ConFig.apiUrl}/sach'),
     headers: {'Content-Type': 'application/json'},
     body: json.encode({
-      'masach': book.id,
       'tensach': book.name,
       'manxbList': book.listPublisherIds,
       'maloaiList': book.listBookTypeIds,
@@ -96,13 +95,15 @@ Future<void> insertBook(Book book) async {
 
   if (response.statusCode == 200) {
     print('Đã thêm sách thành công');
+    return true;
   } else {
     print('Lỗi khi thêm sách: ${response.statusCode}');
+    return false;
   }
 }
 Future<void> updateBook(Book book, List<String> manxbList,List<String> manloaiList,List<String> matgList) async {
   final response = await http.put(
-    Uri.parse('http://localhost:3000/sach/${book.id}'),
+    Uri.parse('${ConFig.apiUrl}/sach/${book.id}'),
     headers: {'Content-Type': 'application/json'},
     body: json.encode({
       'masach': book.id,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:luanvan/view/login_pageview.dart';
 import '../../model/booktype_model.dart';
 import '../../service/booktype_service.dart';
 import '../../widget/addButton.dart';
@@ -7,10 +6,6 @@ import '../../widget/deleteDialog.dart';
 import 'booktypeAdd_pageview.dart';
 
 class ListBookType extends StatefulWidget {
-  late Future<List<BookType>>? bookTypeFuture;
-
-  ListBookType({super.key, this.bookTypeFuture});
-
   @override
   _ListBookTypeState createState() => _ListBookTypeState();
 }
@@ -34,10 +29,15 @@ class _ListBookTypeState extends State<ListBookType> {
       final bookTypes = await fetchBookType();
       setState(() {
         _allBookTypes = bookTypes;
-        _filteredBookTypes = bookTypes;
+        _filteredBookTypes = _searchController.text.isEmpty
+            ? bookTypes
+            : bookTypes.where((bookType) {
+          final nameLower = bookType.name.toLowerCase();
+          return nameLower.contains(_searchController.text.toLowerCase());
+        }).toList();
       });
     } catch (e) {
-     // xu ly su kien neu loi
+      // Xử lý lỗi nếu cần
     }
   }
 
@@ -60,7 +60,7 @@ class _ListBookTypeState extends State<ListBookType> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 300), // Optional: Constrain width
+              constraints: const BoxConstraints(maxWidth: 300), // Optional: Constrain width
               child: TextField(
                 controller: _searchController,
                 decoration: const InputDecoration(
@@ -73,7 +73,7 @@ class _ListBookTypeState extends State<ListBookType> {
         ],
       ),
       body: FutureBuilder<List<BookType>>(
-        future: widget.bookTypeFuture,
+        future: fetchBookType(), // Sử dụng hàm _fetchBookTypes() trực tiếp
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -84,7 +84,7 @@ class _ListBookTypeState extends State<ListBookType> {
           } else {
             final bookTypesList = _filteredBookTypes.isNotEmpty
                 ? _filteredBookTypes
-                : snapshot.data!;
+                : _allBookTypes; // Sử dụng _allBookTypes thay vì snapshot.data!
             return ListView.builder(
               itemCount: bookTypesList.length,
               itemBuilder: (context, index) {
@@ -108,9 +108,9 @@ class _ListBookTypeState extends State<ListBookType> {
                                   ),
                                 ),
                                 const SizedBox(height: 4),
-                                Text('Mã loại : ${bookType.id}'),
+                                Text('Mã loại: ${bookType.id}'),
                                 const SizedBox(height: 4),
-                                Text('Tên loại : ${bookType.name}'),
+                                Text('Tên loại: ${bookType.name}'),
                               ],
                             ),
                           ),
@@ -124,14 +124,16 @@ class _ListBookTypeState extends State<ListBookType> {
                             onPressed: () {
                               showDeleteConfirmationDialog(context, (confirm) async {
                                 if (confirm) {
-                                  bool result=await deleteBooktype(bookTypesList[index]);
-                                  if(result) {
-                                    _fetchBookTypes();
-                                  }else {
-                                      if(mounted){
-                                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(''
-                                            'không thể xóa , vì đã có sách chứa mã loại này')));
-                                      }
+                                  bool result = await deleteBooktype(bookType);
+                                  if (result) {
+                                    await _fetchBookTypes(); // Cập nhật danh sách sau khi xóa
+                                    _filterBookTypes(); // Cập nhật kết quả tìm kiếm
+                                  } else {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Không thể xóa, vì đã có sách chứa mã loại này')),
+                                      );
+                                    }
                                   }
                                 }
                               });
@@ -155,9 +157,11 @@ class _ListBookTypeState extends State<ListBookType> {
             context,
             MaterialPageRoute(builder: (context) => AddBookType()),
           );
-          if (result!=null&&result==true) {
-            _fetchBookTypes();
+          if (result != null && result == true) {
+            await _fetchBookTypes(); // Cập nhật danh sách sau khi thêm mới
+            _filterBookTypes(); // Cập nhật kết quả tìm kiếm
           }
+
         },
       ),
     );

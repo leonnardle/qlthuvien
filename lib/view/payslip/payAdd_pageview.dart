@@ -19,7 +19,6 @@ class AddPaySlip extends StatefulWidget {
 }
 
 class _AddPaySlipState extends State<AddPaySlip> {
-  String? maphieutra;
   String? maphieumuon;
   String? madocgia;
   String? ghichu;
@@ -63,7 +62,6 @@ class _AddPaySlipState extends State<AddPaySlip> {
             ));
           } else {
             PaySlip loanSlip = PaySlip()
-              ..id = maphieutra!
               ..loanId = maphieumuon!
               ..payDay = DateTime.now()
               ..listBookIds = validBookIds
@@ -135,21 +133,6 @@ class _AddPaySlipState extends State<AddPaySlip> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('mã phieu tra'),
-                  FormHelper.inputFieldWidget(context, "mã phieu tra", "mã phieu tra",
-                          (onValiDate) {
-                        if (onValiDate.isEmpty) {
-                          return ("mã phieu tra không được trống");
-                        }
-                      }, (onSaved) {
-                        maphieutra = onSaved;
-                      },
-                      borderFocusColor: Colors.white,
-                      borderColor: Colors.white,
-                      textColor: Colors.black,
-                      hintColor: Colors.black,
-                      borderRadius: 10),
-                  SizedBox(height: 10),
                   Text('ma phieu muon'),
                   FormHelper.inputFieldWidget(
                       context,

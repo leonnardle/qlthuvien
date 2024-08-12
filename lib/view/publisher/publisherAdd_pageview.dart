@@ -26,13 +26,15 @@ class _AddPublisherState extends State<AddPublisher> {
   void addNhaxuatban() async {
     if (FormValidator.checkValidateAndSave(PublisherAddFormKey)) {
       Publisher publisher = Publisher()
-        ..id = manxb!
         ..name = tennxb!
         ..address = diachi!
         ..phonenumber = sdt!;
 
       try {
-        await insertPublisher(publisher);
+       bool check= await insertPublisher(publisher);
+       if(!check){
+         return;
+       }
         if (mounted) {
           Navigator.pop(context, true);
         }
@@ -67,7 +69,7 @@ class _AddPublisherState extends State<AddPublisher> {
     return Scaffold(
       //drawer: NavBar(),
       appBar: AppBar(
-        title: Text('Thêm Loại Sách'),
+        title: Text('Thêm nha xuat ban'),
       ),
       body: Stack(
         children: [
@@ -83,22 +85,6 @@ class _AddPublisherState extends State<AddPublisher> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('mã nxb'),
-                    FormHelper.inputFieldWidget(context, "mã nxb", "mã nxb",
-                            (onValiDate) {
-                          if (onValiDate.isEmpty) {
-                            return ("mã nxb không được trống");
-                          }
-                        }, (onSaved) {
-                          manxb = onSaved;
-                        },
-                        borderFocusColor: Colors.white,
-                        borderColor: Colors.white,
-                        textColor: Colors.black,
-                        hintColor: Colors.black,
-                        borderRadius: 10),
-
-                    SizedBox(height: 10),
                     Text('ten nxb'),
 
                     FormHelper.inputFieldWidget(
@@ -113,7 +99,9 @@ class _AddPublisherState extends State<AddPublisher> {
                       borderColor: Colors.white,
                       textColor: Colors.black,
                       hintColor: Colors.black,
+                      maxLength: 50,
                       borderRadius: 10,
+
                     ),
                     SizedBox(height: 10),
                     Text('dia chi'),
@@ -130,6 +118,7 @@ class _AddPublisherState extends State<AddPublisher> {
                       borderColor: Colors.white,
                       textColor: Colors.black,
                       hintColor: Colors.black,
+
                       borderRadius: 10,
                     ),
                     SizedBox(height: 10),
@@ -148,6 +137,9 @@ class _AddPublisherState extends State<AddPublisher> {
                       textColor: Colors.black,
                       hintColor: Colors.black,
                       borderRadius: 10,
+                      maxLength: 11,
+                      isNumeric: true
+
                     ),
                     SizedBox(height: 10),
                     MyButton(onTap: addNhaxuatban, text: 'them nxb',),

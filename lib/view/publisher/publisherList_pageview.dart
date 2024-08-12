@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:luanvan/view/publisher/publisherAdd_pageview.dart';
 
 import '../../model/publisher_model.dart';
@@ -163,6 +164,11 @@ class _ListPublisherState extends State<ListPublisher> {
                 decoration: InputDecoration(
                   labelText: 'Số điện thoại',
                 ),
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(11), // Giới hạn 11 ký tự
+                ],
               ),
             ],
           ),

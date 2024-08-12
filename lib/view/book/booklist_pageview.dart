@@ -19,9 +19,8 @@ import '../../widget/navbar.dart';
 import 'bookAdd_pageview.dart';
 
 class ListBook extends StatefulWidget {
-  late Future<List<Book>>? booksFuture;
 
-  ListBook({Key? key,  this.booksFuture}) : super(key: key);
+  ListBook({Key? key,}) : super(key: key);
 
   @override
   _ListBookState createState() => _ListBookState();
@@ -30,6 +29,33 @@ class _ListBookState extends State<ListBook> {
   final TextEditingController _searchController = TextEditingController();
   List<Book> _allBookTypes = [];
   List<Book> _filteredBook = [];
+  void _refreshBooks() async {
+    try {
+      final bookTypes = await fetchBooks();
+      setState(() {
+        _allBookTypes = bookTypes;
+        _filteredBook = _searchController.text.isEmpty
+            ? bookTypes
+            : bookTypes.where((bookType) {
+          final nameLower = bookType.name.toLowerCase();
+          return nameLower.contains(_searchController.text.toLowerCase());
+        }).toList();
+      });
+    } catch (e) {
+      // Xử lý lỗi nếu cần
+    }
+  }
+
+  // cái này dùng để cập nhật danh sách khi thêm để đồng bộ với sách trong list để thực hiện chức năng tìm kiếm
+  void _filterBook() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredBook = _allBookTypes.where((bookType) {
+        final nameLower = bookType.id.toLowerCase();
+        return nameLower.contains(query);
+      }).toList();
+    });
+  }  // dung de nap danh sach lan dau khi tai len
   Future<void> _fetchBook() async {
     try {
       final bookTypes = await fetchBooks();
@@ -40,16 +66,6 @@ class _ListBookState extends State<ListBook> {
     } catch (e) {
       // Xu ly su kien neu loi
     }
-  }
-
-  void _filterBook() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _filteredBook = _allBookTypes.where((bookType) {
-        final nameLower = bookType.name.toLowerCase();
-        return nameLower.contains(query);
-      }).toList();
-    });
   }
   @override
 
@@ -101,7 +117,7 @@ class _ListBookState extends State<ListBook> {
 
       ),
       body: FutureBuilder<List<Book>>(
-        future: widget.booksFuture,
+        future: fetchBooks(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -158,20 +174,21 @@ class _ListBookState extends State<ListBook> {
                           ),
                           IconButton(
                             onPressed: ()  {
-                               _showEditDialog(context, book);
+
+                              _showEditDialog(context, book);
                             },
                             icon: Icon(Icons.edit),
                           ),
                           IconButton(
-                            onPressed: () {
+                            onPressed: () async {
                               showDeleteConfirmationDialog(context, (confirmed) async {
                                 if (confirmed) {
-                                  bool result= await deleteBook(book.id);
-                                  if(result) {
-                                    _refreshBooks();
-                                  }else{
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('không thể xóa,'
-                                        'nó đã tồn tại trong 1 phiếu mượn')));
+                                  bool result = await deleteBook(book.id);
+                                  if (result) {
+                                    await _fetchBook();
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Đã xóa sách thành công!')));
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Không thể xóa, sách đã tồn tại trong 1 phiếu mượn')));
                                   }
                                 }
                               });
@@ -193,13 +210,15 @@ class _ListBookState extends State<ListBook> {
       ),
       floatingActionButton: AddButton(
         onPressed: () async{
-          bool? result=await
+          bool result=await
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AddBook()),
+            MaterialPageRoute(builder: (context) =>  AddBook()),
           );
-          if(result!=null&&result==true){
+          if(result){
             _refreshBooks();
+          }else{
+            print('có lỗi khi thêm sách');
           }
         },
       ),
@@ -221,33 +240,30 @@ class _ListBookState extends State<ListBook> {
     Future<void> _fetchPublishers() async {
       try {
         final publishers = await fetchPublisher();
-        setState(() {
-          publishers0 = publishers;
-        });
+        publishers0 = publishers; // Không cần setState ở đây
       } catch (error) {
         print('Lỗi khi nạp danh sách nhà xuất bản: $error');
       }
     }
+
     Future<void> _fetchBookTypes() async {
       try {
         final bookType = await fetchBookType();
-        setState(() {
-          bookType0 = bookType;
-        });
+        bookType0 = bookType; // Không cần setState ở đây
       } catch (error) {
-        print('Lỗi khi nạp danh sách nhà xuất bản: $error');
+        print('Lỗi khi nạp danh sách loại sách: $error');
       }
     }
-    Future<void> _fetchAuthor() async {
+
+    Future<void> _fetchAuthors() async {
       try {
         final author = await fetchAuthor();
-        setState(() {
-          author0 = author;
-        });
+        author0 = author; // Không cần setState ở đây
       } catch (error) {
-        print('Lỗi khi nạp danh sách nhà xuất bản: $error');
+        print('Lỗi khi nạp danh sách tác giả: $error');
       }
     }
+
     Future<void> pickImage(Function setState) async {
       Image? pickedImage = await ImagePickerHelper().pickImageFromGallery();
       if (pickedImage != null) {
@@ -256,6 +272,7 @@ class _ListBookState extends State<ListBook> {
         });
       }
     }
+
     Future<void> selectPublishers(BuildContext dialogContext, StateSetter setState) async {
       List<String> selectedPublisherIds = selectedPublishers.map((p) => p.id).toList();
       await showDialog<List<Publisher>>(
@@ -274,16 +291,16 @@ class _ListBookState extends State<ListBook> {
         },
       );
     }
-    Future<void> selecBookTypes(BuildContext dialogContext, StateSetter setState) async {
-      List<String> selectedBookTypes = selectedBooktype.map((p) => p.id).toList();
 
+    Future<void> selectBookTypes(BuildContext dialogContext, StateSetter setState) async {
+      List<String> selectedBookTypes = selectedBooktype.map((p) => p.id).toList();
       await showDialog<List<BookType>>(
         context: dialogContext,
         builder: (context) {
           return MultiSelectDialog(
             items: bookType0.map((p) => MultiSelectItem(p, p.id)).toList(),
             initialValue: bookType0.where((p) => selectedBookTypes.contains(p.id)).toList(),
-            title: const Text('chọn mã loại'),
+            title: const Text('Chọn Mã Loại'),
             onConfirm: (values) {
               setState(() {
                 selectedBooktype = values;
@@ -293,16 +310,16 @@ class _ListBookState extends State<ListBook> {
         },
       );
     }
-    Future<void> selecAuthors(BuildContext dialogContext, StateSetter setState) async {
-      List<String> selectedAuthors = selectedAuthor.map((p) => p.id).toList();
 
+    Future<void> selectAuthors(BuildContext dialogContext, StateSetter setState) async {
+      List<String> selectedAuthors = selectedAuthor.map((p) => p.id).toList();
       await showDialog<List<Author>>(
         context: dialogContext,
         builder: (context) {
           return MultiSelectDialog(
             items: author0.map((p) => MultiSelectItem(p, p.id)).toList(),
             initialValue: author0.where((p) => selectedAuthors.contains(p.id)).toList(),
-            title: const Text('chọn ma tac gia'),
+            title: const Text('Chọn Mã Tác Giả'),
             onConfirm: (values) {
               setState(() {
                 selectedAuthor = values;
@@ -313,160 +330,158 @@ class _ListBookState extends State<ListBook> {
       );
     }
 
-    await _fetchPublishers();
-    await _fetchBookTypes();
-    await _fetchAuthor();
+    try {
+      await Future.wait([
+        _fetchPublishers(),
+        _fetchBookTypes(),
+        _fetchAuthors(),
+      ]);
 
-    return showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: const Text('Chỉnh Sửa Sách'),
-              content: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration:const  InputDecoration(
-                        labelText: 'Tên sách',
-                      ),
-                    ),
-                    TextField(
-                      controller: descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Mô tả',
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    GestureDetector(
-                      onTap: () => selectPublishers(dialogContext, setState),
-                      child: InputDecorator(
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return AlertDialog(
+                title: const Text('Chỉnh Sửa Sách'),
+                content: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: nameController,
                         decoration: const InputDecoration(
-                          labelText: 'Chọn Nhà Xuất Bản',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: Text(
-                          selectedPublishers.isEmpty
-                              ? 'Chưa chọn nhà xuất bản'
-                              : selectedPublishers.map((p) => p.name).join(', '),
+                          labelText: 'Tên sách',
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    GestureDetector(
-                      onTap: () => selecBookTypes(dialogContext, setState),
-                      child: InputDecorator(
+                      TextField(
+                        controller: descriptionController,
                         decoration: const InputDecoration(
-                          labelText: 'Chọn mã loại',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: Text(
-                          selectedBooktype.isEmpty
-                              ? 'Chưa chọn mã loại'
-                              : selectedBooktype.map((p) => p.id).join(', '),
+                          labelText: 'Mô tả',
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    GestureDetector(
-                      onTap: () => selecAuthors(dialogContext, setState),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Chọn mã tác giả',
-                          border: OutlineInputBorder(),
-                        ),
-                        child: Text(
-                          selectedAuthor.isEmpty
-                              ? 'Chưa chọn mã tác giả'
-                              : selectedAuthor.map((p) => p.id).join(', '),
+                      const SizedBox(height: 16.0),
+                      GestureDetector(
+                        onTap: () => selectPublishers(dialogContext, setState),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Chọn Nhà Xuất Bản',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Text(
+                            selectedPublishers.isEmpty
+                                ? 'Chưa chọn nhà xuất bản'
+                                : selectedPublishers.map((p) => p.name).join(', '),
+                          ),
                         ),
                       ),
-                    ),
-                    selectedImage == null
-                        ? const Text('Chưa chọn ảnh')
-                        : Image(image: selectedImage!.image, width: 100, height: 100, fit: BoxFit.cover),
-                    const SizedBox(height: 16.0),
-                    ElevatedButton(
-                      onPressed: () => pickImage(setState),
-                      child: Text('Chọn Ảnh'),
-                    ),
-                  ],
+                      const SizedBox(height: 16.0),
+                      GestureDetector(
+                        onTap: () => selectBookTypes(dialogContext, setState),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Chọn Mã Loại',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Text(
+                            selectedBooktype.isEmpty
+                                ? 'Chưa chọn mã loại'
+                                : selectedBooktype.map((p) => p.id).join(', '),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      GestureDetector(
+                        onTap: () => selectAuthors(dialogContext, setState),
+                        child: InputDecorator(
+                          decoration: const InputDecoration(
+                            labelText: 'Chọn Mã Tác Giả',
+                            border: OutlineInputBorder(),
+                          ),
+                          child: Text(
+                            selectedAuthor.isEmpty
+                                ? 'Chưa chọn mã tác giả'
+                                : selectedAuthor.map((p) => p.id).join(', '),
+                          ),
+                        ),
+                      ),
+                      selectedImage == null
+                          ? const Text('Chưa chọn ảnh')
+                          : Image(image: selectedImage!.image, width: 100, height: 100, fit: BoxFit.cover),
+                      const SizedBox(height: 16.0),
+                      ElevatedButton(
+                        onPressed: () => pickImage(setState),
+                        child: const Text('Chọn Ảnh'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                  },
-                  child: Text('Hủy'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    setState(() {
-                      isLoading = true;
-                    });
-
-                    final newName = nameController.text;
-                    final newDescription = descriptionController.text;
-
-                    if (newName.isEmpty  || newDescription.isEmpty || selectedPublishers.isEmpty
-                    ||selectedBooktype.isEmpty) {
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                    child: const Text('Hủy'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
                       setState(() {
-                        isLoading = false;
+                        isLoading = true;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin!')),
-                      );
-                      return;
-                    }
-                    book.name = newName;
-                    book.description = newDescription;
 
-                    if (selectedImage != null) {
-                      book.image = selectedImage;
-                      book.imageBase64 = await book.getImageBase64();
-                    }
+                      final newName = nameController.text;
+                      final newDescription = descriptionController.text;
 
-                    final manxbList = selectedPublishers.map((p) => p.id).toList();
+                      if (newName.isEmpty || newDescription.isEmpty || selectedPublishers.isEmpty || selectedBooktype.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin!')),
+                        );
+                        return;
+                      }
+                      book.name = newName;
+                      book.description = newDescription;
 
-                    final maloaiList = selectedBooktype.map((p) => p.id).toList();
+                      if (selectedImage != null) {
+                        book.image = selectedImage;
+                        book.imageBase64 = await book.getImageBase64();
+                      }
 
-                    final matacgiaList = selectedAuthor.map((p) => p.id).toList();
+                      final manxbList = selectedPublishers.map((p) => p.id).toList();
+                      final maloaiList = selectedBooktype.map((p) => p.id).toList();
+                      final matacgiaList = selectedAuthor.map((p) => p.id).toList();
 
-                    try {
-                      await updateBook(book, manxbList,maloaiList,matacgiaList);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Cập nhật sách thành công!')),
-                      );
-                    } catch (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                         SnackBar(content: Text('Lỗi khi cập nhật sách: $error')),
-                      );
-                    } finally {
-                      setState(() {
-                        isLoading = false;
-                      });
-                      Navigator.pop(context);
-                      _refreshBooks();  // Cập nhật dữ liệu khi hoàn thành chỉnh sửa sách
-                    }
-                  },
-                  child: const Text('Cập Nhật'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+                      try {
+                        await updateBook(book, manxbList, maloaiList, matacgiaList);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Cập nhật sách thành công!')),
+                        );
+                      } catch (error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Lỗi khi cập nhật sách: $error')),
+                        );
+                      } finally {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        Navigator.pop(context);
+                        _refreshBooks();
+                      }
+                    },
+                    child: const Text('Cập Nhật'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    } catch (error) {
+      print(error);
+    }
   }
-  void _refreshBooks() {
-    setState(() {
-      widget.booksFuture = fetchBooks(); // Cập nhật Future để lấy dữ liệu mới
-    });
   }
-}

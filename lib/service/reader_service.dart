@@ -27,7 +27,6 @@ Future<void> insertReader(Reader reader) async {
         'Accept': 'application/json',
       },
       body: jsonEncode({
-        'madocgia': reader.id,
         'tendocgia': reader.name,
         //'mapm': reader.loanId!=""?reader.loanId:null,
         'email': reader.email,

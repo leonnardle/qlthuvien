@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
       final Map<String, dynamic> jsonData = json.decode(response.body);
       return jsonData['count'];
     } else {
-      throw Exception('Failed to load loan slip count');
+      throw Exception('lỗi khi nạp số lương phiếu');
     }
   }
   void _getLoanSlipCount() async {
@@ -67,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
         loanSlipCount = count;
       });
     } catch (e) {
-      print('Error fetching loan slip count: $e');
+      print('lỗi khi nạp số lương phiếu: $e');
     }
   }
   @override
@@ -142,26 +142,13 @@ class NavBar extends StatelessWidget {
             title: Text('Quản Lý Thông Tin Sách'),
             onTap: () {
               // Tạo Future mới mỗi khi chọn
-              Future<List<Book>> booksFuture = fetchBooks();
-              onItemSelected(FutureBuilder<List<Book>>(
-                future: booksFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else{
-                    return ListBook(booksFuture: booksFuture,);
-                  }
-                },
-              ));
+              onItemSelected(ListBook());
             },
           ),
           ListTile(
             title: Text('Quản Lý Loại Sách'),
             onTap: () async {
-              Future<List<BookType>> bookstypeFuture = fetchBookType();
-              onItemSelected(ListBookType(bookTypeFuture: bookstypeFuture,));
+              onItemSelected(ListBookType());
             },
           ),
           ListTile(
@@ -188,8 +175,7 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text('Quản Lý Phiếu Mượn'),
             onTap: () async {
-              Future<List<LoanSlip>> list =  fetchLoanslip();
-              onItemSelected(ListLoanSlip(LoanSlipFuture: list));
+              onItemSelected(ListLoanSlip());
             },
           ),
           ListTile(

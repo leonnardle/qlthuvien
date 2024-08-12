@@ -232,16 +232,6 @@ class _AddBookState extends State<AddBook> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextFormField(
-                  controller: _idController,
-                  decoration: InputDecoration(labelText: 'Mã Sách'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Mã sách không được để trống';
-                    }
-                    return null;
-                  },
-                ),
-                TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(labelText: 'Tên Sách'),
                   validator: (value) {

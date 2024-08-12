@@ -41,7 +41,7 @@ class _ListAuthorState extends State<ListAuthor> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Lỗi khi tải sách: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Không có sách'));
+            return const Center(child: Text('Không có tacgia nao'));
           } else {
             final authors = snapshot.data!;
             return Stack(
@@ -127,30 +127,25 @@ class _ListAuthorState extends State<ListAuthor> {
                     },
                   ),
                 ),
-                Positioned(
-                  bottom: 60,
-                  right: 30,
-                  child: AddButton(
-                    onPressed: () async{
-                      // Thêm tác giả mới
-                      bool result=await
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => AddAuthor()),
-                      );
-                      if(result){
-                        _refreshAuthors();
-                      }
-                    },
-                  ),
-                ),
               ],
 
             );
+
           }
         },
       ),
-
+      floatingActionButton: AddButton(
+        onPressed: () async{
+          bool? result=await
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) =>  AddAuthor()),
+          );
+          if(result!=null&&result==true){
+            _refreshAuthors();
+          }
+        },
+      ),
     );
   }
 

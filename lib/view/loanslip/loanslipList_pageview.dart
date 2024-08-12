@@ -16,9 +16,8 @@ import '../../widget/deleteDialog.dart';
 import 'loanslipAdd_pageview.dart';
 
 class ListLoanSlip extends StatefulWidget {
-  late Future<List<LoanSlip>>? LoanSlipFuture;
 
-  ListLoanSlip({super.key, this.LoanSlipFuture});
+  ListLoanSlip({super.key, });
 
   @override
   _ListBookTypeState createState() => _ListBookTypeState();
@@ -81,7 +80,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
         ],
       ),
       body: FutureBuilder<List<LoanSlip>>(
-          future: widget.LoanSlipFuture,
+          future:  fetchLoanslip(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -142,7 +141,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                                   if (confirm) {
                                     bool result=await deleteLoanslip(loanSlip);
                                     if(result){
-                                      _refreshData();
+                                      _fetchLoanSlip();
                                     }else{
                                       if(mounted){
                                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('có lỗi xảy ra , đã có phiếu trả tồn tại cho phiếu mượn này '
@@ -156,7 +155,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                             IconButton(
                               onPressed: () {
                                 _showPaySlipDialog(context, loanSlip);
-                                _refreshData();
+                                _fetchLoanSlip();
                               },
                               icon: Icon(Icons.library_add_check_sharp),
                             ),
@@ -177,7 +176,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
             MaterialPageRoute(builder: (context) => AddLoanSlip()),
           );
           if (result) {
-            _refreshData();
+            _fetchLoanSlip();
           }
         },
       ),
@@ -193,7 +192,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
         );
       },
     ).then((result) {
-        _refreshData();
+      _fetchLoanSlip();
     });
   }
   void _showEditDialog(BuildContext context, LoanSlip loanSlip) async {
@@ -259,7 +258,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                       bool result=await updateLoanslip(loanSlip);
                       if(result&&mounted){
                         Navigator.pop(context, true);
-                        _refreshData();
+                        _fetchLoanSlip();
                       }else{
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('không thể chỉnh sửa đã có phiếu trả tương ứng cho phiếu mượn này'),
@@ -272,7 +271,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                       print("Đã xảy ra lỗi khi sửa phiếu mượn: $error");
                     }
                   }
-                  _refreshData(); // Cập nhật dữ liệu sau khi chỉnh sửa
+                  _fetchLoanSlip(); // Cập nhật dữ liệu sau khi chỉnh sửa
                 }
               },
               child: Text('Cập Nhật'),
@@ -282,10 +281,6 @@ class _ListBookTypeState extends State<ListLoanSlip> {
       },
     );
   }
-  void _refreshData() {
-    setState(() {
-      widget.LoanSlipFuture = fetchLoanslip(); // Cập nhật Future để lấy dữ liệu mới
-    });
-  }
+
 
 }

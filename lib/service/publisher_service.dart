@@ -21,7 +21,7 @@ Future<List<Publisher>> fetchPublisher() async {
     throw Exception('unable connect to api');
   }
 }
-Future<void> insertPublisher(Publisher publisher) async {
+Future<bool> insertPublisher(Publisher publisher) async {
   try {
     final response = await http.post(
       Uri.parse('${ConFig.apiUrl}/nhaxuatban/'),
@@ -30,7 +30,6 @@ Future<void> insertPublisher(Publisher publisher) async {
         'Accept': 'application/json',
       },
       body: jsonEncode({
-        'manxb': publisher.id,
         'tennxb': publisher.name,
         'diachi': publisher.address,
         'sdt': publisher.phonenumber
@@ -43,11 +42,17 @@ Future<void> insertPublisher(Publisher publisher) async {
 
     if (response.statusCode == 200) {
       print('Đã thêm loại nxb thành công');
+      return true;
     } else {
+
       print('Đã xảy ra lỗi khi thêm nxb. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
+      return false;
+
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu thêm nxb: $e');
+    return true;
+
   }
 }
 Future<void> updatePublisher(Publisher publisher) async {
