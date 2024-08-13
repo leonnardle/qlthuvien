@@ -160,7 +160,6 @@ class _ListReaderState extends State<ListReader> {
             context,
             MaterialPageRoute(builder: (context) => AddReader()),
           );
-
           if (result != null && result == true) {
             _fetchReaders(); // Cập nhật danh sách sau khi thêm mới
           }

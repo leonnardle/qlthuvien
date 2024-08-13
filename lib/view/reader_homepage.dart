@@ -26,16 +26,42 @@ class CustomerHomePage extends StatefulWidget {
 }
 
 class _CustomerHomePageState extends State<CustomerHomePage> {
-  late Future<List<Book>> booksFuture;
+  late Future<List<Book>> booksFuture = fetchBooks();
   List<CartItem> cart = []; // Giỏ hàng
   Reader? currentReader;
   bool loading = false; // Biến theo dõi trạng thái tải lại
   List<Book> _availableBooks = []; // Biến lưu trữ sách có sẵn
+  List<Book> _allBookTypes = [];
+  List<Book> _filteredBook = [];
+  final TextEditingController _searchController = TextEditingController();
+  void _filterBook() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredBook = _availableBooks.where((book) {
+        final idLower = book.name.toLowerCase();
+        return idLower.contains(query); // Nếu true thì thêm kết quả vào danh sách
+      }).toList();
+    });
+  }
+
+  Future<void> _fetchBook() async {
+    try {
+      final books = await fetchBooks();
+      setState(() {
+        _availableBooks = books.where((book) => book.trangthai == 0).toList();
+        _allBookTypes = _availableBooks; // Khởi tạo _allBookTypes với danh sách sách đầy đủ
+        _filteredBook = _availableBooks;
+      });
+    } catch (e) {
+      // Xử lý sự kiện nếu lỗi
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    booksFuture = fetchBooks();
+    //booksFuture = fetchBooks();
+    _fetchBook();
     getReaderDetail((reader) {
       setState(() {
         currentReader = reader; // Cập nhật currentReader và gọi setState
@@ -148,8 +174,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
 
     // Gọi lại fetchBooks
     try {
-      booksFuture = fetchBooks(); // Cập nhật booksFuture
-      await booksFuture; // Đợi cho đến khi danh sách sách được tải lại
+      await _fetchBook();
     } catch (error) {
       print('Lỗi khi tải lại sách: $error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -236,7 +261,28 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
       ),
       appBar: AppBar(
         title: Text('Danh Sách Sách'),
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50.0),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Tìm kiếm theo mã sách...',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ),
+
         actions: [
+
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterBook(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
+          ),
           IconButton(
             icon: Icon(Icons.refresh), // Nút refresh
             onPressed: () {
@@ -310,10 +356,10 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text('Không có sách nào'));
           }
-
           // Lọc sách có sẵn để cho mượn
           _availableBooks =
               snapshot.data!.where((book) => book.trangthai == 0).toList();
+          final booksToDisplay = _filteredBook.isNotEmpty ? _filteredBook : _availableBooks;
 
           if (_availableBooks.isEmpty) {
             return Center(child: Text('Không có sách nào có sẵn để mượn'));
@@ -327,9 +373,9 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
               mainAxisSpacing: 10,
             ),
             padding: const EdgeInsets.all(10),
-            itemCount: _availableBooks.length,
+            itemCount: booksToDisplay.length,
             itemBuilder: (context, index) {
-              Book book = _availableBooks[index];
+              Book book = booksToDisplay[index];
               return Card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

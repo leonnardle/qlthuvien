@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -107,6 +108,10 @@ class _RegisterPageState extends State<RegisterPage> {
               controller: _phoneController,
               decoration: InputDecoration(labelText: 'Số điện thoại'),
               keyboardType: TextInputType.phone,
+              maxLength: 11,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly, // Chỉ cho phép nhập số
+              ],
             ),
             SizedBox(height: 20),
             ElevatedButton(

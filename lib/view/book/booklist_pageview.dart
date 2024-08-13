@@ -172,6 +172,8 @@ class _ListBookState extends State<ListBook> {
                                 Text('Mã loại sách: ${book.bookTypeList.map((p) => p.id).join(', ')}'),
                                 Text('Nhà xuất bản: ${book.publishersList.map((p) => p.id).join(', ')}'),
                                 Text('Mô tả: ${book.description}'),
+                                Text('trạng thái: ${book.trangthai==0?'có sẵn':'không có sẵn'}'),
+
                               ],
                             ),
                           ),

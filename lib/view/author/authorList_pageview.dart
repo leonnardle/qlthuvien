@@ -160,7 +160,10 @@ class _ListAuthorState extends State<ListAuthor> {
                                           await _fetchAuthor();
                                           _filterAuthor();
                                         } else {
-                                          print('đã xảy ra lỗi khi xóa tác giả với id : ${author.id}');
+                                          if(mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(''
+                                                'không thể xóa , đã có sách tương ứng với tác giả này. hãy chỉnh sửa chúng trước')));
+                                          }
                                         }
                                       }
                                     });

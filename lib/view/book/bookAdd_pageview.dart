@@ -76,7 +76,6 @@ class _AddBookState extends State<AddBook> {
       _selectedImage = book.image;
     });
   }
-
   Future<void> _saveBook() async {
     if (_addBookKey.currentState?.validate() ?? false) {
       setState(() {

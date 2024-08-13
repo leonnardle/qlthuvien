@@ -10,6 +10,7 @@ class Book {
   String _name = '';
   String _description = '';
   Image? _image;
+  String? status='';
   String? _imageBase64;
   List<String> _listPublisherIds = [];
   List<Publisher> _publishersList = [];

@@ -146,6 +146,11 @@ class _ListPublisherState extends State<ListPublisher> {
                                   if (response) {
                                     _fetchPublisher();
                                     _filterPublisher();
+                                  }else{
+                                    if(mounted){
+                                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(''
+                                          'đã có sách cho nhà xuất bản này . hãy kiểm tra lại')));
+                                    }
                                   }
                                 }
                               });
