@@ -33,9 +33,15 @@ class _AddReaderState extends State<AddReader> {
         ..phoneNumber=sdt!;
 
       try {
-        await insertReader(reader);
-        if(mounted) {
+        bool check=await insertReader(reader);
+        if(check){
+          if(mounted) {
           Navigator.pop(context, true);
+         }
+        }else{
+          if(mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('đã có email tồn tại cho đọc giả này')));;
+          }
         }
       }catch(error){
         if(kDebugMode){
@@ -135,10 +141,13 @@ class _AddReaderState extends State<AddReader> {
                     context,
                     "sdt",
                     "sdt",
-                        (onValiDate) {
-                      if (onValiDate.isEmpty) {
-                        return ("tên doc gia không được để trống");
+                        (onValidate) {
+                      if (onValidate.isEmpty) {
+                        return "Số điện thoại không được để trống";
+                      } else if (onValidate.length != 11) {
+                        return "Số điện thoại phải có đúng 11 ký tự";
                       }
+                      return null; // Nếu hợp lệ, trả về null
                     },
                         (onSaved) {
                       sdt = onSaved;
@@ -148,6 +157,8 @@ class _AddReaderState extends State<AddReader> {
                     textColor: Colors.black,
                     hintColor: Colors.black,
                     borderRadius: 10,
+                    maxLength: 11,
+
                   ),
                   SizedBox(height: 10),
                   MyButton(

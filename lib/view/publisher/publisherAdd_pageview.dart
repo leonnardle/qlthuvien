@@ -91,7 +91,11 @@ class _AddPublisherState extends State<AddPublisher> {
                       context,
                       "tên nxb",
                       "tên nxb",
-                          (onValiDate) {},
+                          (onValiDate) {
+                        if(onValiDate.isEmpty){
+                          return('tên nxb không được trống');
+                        }
+                          },
                           (onSaved) {
                         tennxb = onSaved;
                       },
@@ -110,7 +114,11 @@ class _AddPublisherState extends State<AddPublisher> {
                       context,
                       "dia chi",
                       "dia chi",
-                          (onValiDate) {},
+                          (onValiDate) {
+                            if(onValiDate.isEmpty){
+                              return('địa chỉ không được trống');
+                            }
+                          },
                           (onSaved) {
                         diachi = onSaved;
                       },
@@ -128,7 +136,16 @@ class _AddPublisherState extends State<AddPublisher> {
                       context,
                       " sdt",
                       "sdt",
-                          (onValiDate) {},
+                          (onValiDate) {
+                            if(onValiDate.isEmpty){
+                              return('sdt không được trống');
+                            }else{
+                              if(onValiDate.length != 11){
+                                return "Số điện thoại phải có đúng 11 ký tự";
+                              }
+                              return null;
+                            }
+                          },
                           (onSaved) {
                         sdt = onSaved;
                       },

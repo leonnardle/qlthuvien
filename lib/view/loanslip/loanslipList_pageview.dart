@@ -53,9 +53,7 @@ class _ListBookTypeState extends State<ListLoanSlip> {
     //_booktypeFuture = fetchBookType();
 
     _fetchLoanSlip();
-    _searchController.addListener(() {
-      _filterLoanSlip();
-    });
+
   }
 
   @override
@@ -76,6 +74,12 @@ class _ListBookTypeState extends State<ListLoanSlip> {
                 ),
               ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterLoanSlip(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
           ),
         ],
       ),

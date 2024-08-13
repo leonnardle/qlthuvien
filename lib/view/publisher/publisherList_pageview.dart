@@ -11,24 +11,78 @@ import 'booklistByPublisher_pageview.dart';
 
 
 class ListPublisher extends StatefulWidget {
-  late Future<List<Publisher>>? items;
 
-  ListPublisher({super.key, this.items});
+  ListPublisher({super.key});
 
   _ListPublisherState createState() => _ListPublisherState();
 }
 
 class _ListPublisherState extends State<ListPublisher> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Publisher> _allPublisher = [];
+  List<Publisher> _filteredPublisher = [];
+  Future<void> _fetchPublisher() async {
+    try {
+      final bookTypes = await fetchPublisher();
+      setState(() {
+        _allPublisher = bookTypes;
+        _filteredPublisher = _searchController.text.isEmpty
+            ? bookTypes
+            : bookTypes.where((bookType) {
+          final nameLower = bookType.id.toLowerCase();
+          return nameLower.contains(_searchController.text.toLowerCase());
+        }).toList();
+      });
+    } catch (e) {
+      // Xử lý lỗi nếu cần
+    }
+  }
 
+  void _filterPublisher() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredPublisher = _allPublisher.where((bookType) {
+        final nameLower = bookType.id.toLowerCase();
+        return nameLower.contains(query);
+      }).toList();
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _fetchPublisher();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       //drawer: NavBar(),
       appBar: AppBar(
         title: const Text('Danh Sách nhà xuất bản'),
+        actions: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300), // Optional: Constrain width
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm theo tên loại...',
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterPublisher(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
+          ),
+        ],
       ),
       body:FutureBuilder<List<Publisher>>(
-      future: widget.items,
+      future: fetchPublisher(),
       builder: (context,snapshot){
         if(snapshot.connectionState==ConnectionState.waiting){
           return const CircularProgressIndicator();
@@ -37,16 +91,18 @@ class _ListPublisherState extends State<ListPublisher> {
         }else if(!snapshot.hasData||snapshot.data!.isEmpty){
           return const Center(child: Text('khong co sach'),);
         }else{
-          final publishers = snapshot.data!;
+          final bookTypesList = _filteredPublisher.isNotEmpty
+              ? _filteredPublisher
+              : _allPublisher; // Sử dụng _allBookTypes
           return Stack(
         children: [
           Positioned.fill(
             top: 10,
             child:
               ListView.builder(
-              itemCount: publishers.length,
+              itemCount: bookTypesList.length,
               itemBuilder: (context, index) {
-                Publisher publisher=publishers[index];
+                Publisher publisher=bookTypesList[index];
                    return GestureDetector(
                   child: Card(
                     margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
@@ -88,7 +144,8 @@ class _ListPublisherState extends State<ListPublisher> {
                                 if(confirm){
                                   bool response = await deletePublisher(publisher);
                                   if (response) {
-                                    _refreshAuthors();
+                                    _fetchPublisher();
+                                    _filterPublisher();
                                   }
                                 }
                               });
@@ -100,12 +157,12 @@ class _ListPublisherState extends State<ListPublisher> {
                     ),
                   ),
                   onTap: () {
-                    Navigator.push(
+                   /* Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => PublisherBooksPage(publisher: publisher),
                       ),
-                    );
+                    );*/
 
                   },
                 );
@@ -122,18 +179,15 @@ class _ListPublisherState extends State<ListPublisher> {
             MaterialPageRoute(builder: (context) => AddPublisher()),
           );
           if (result) {
-            _refreshAuthors();
+            await _fetchPublisher(); // Cập nhật danh sách sau khi thêm mới
+            _filterPublisher(); // Cập nhật kết quả tìm kiếm
           }
         },
       ),
 
     );
   }
-  void _refreshAuthors() {
-    setState(() {
-      widget.items = fetchPublisher(); // Cập nhật Future để lấy dữ liệu mới
-    });
-  }
+
   void _showEditDialog(BuildContext context, Publisher publisher) async {
     late TextEditingController tennxbController = TextEditingController(text: publisher.name);
     late TextEditingController diachiController = TextEditingController(text: publisher.address);
@@ -193,7 +247,7 @@ class _ListPublisherState extends State<ListPublisher> {
                   if(mounted) {
                     await updatePublisher(publisher);
                     Navigator.of(context).pop();
-                    _refreshAuthors();
+                    _fetchPublisher();
                   }
                 }catch(error){
                   rethrow;

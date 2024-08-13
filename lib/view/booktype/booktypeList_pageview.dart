@@ -19,9 +19,9 @@ class _ListBookTypeState extends State<ListBookType> {
   void initState() {
     super.initState();
     _fetchBookTypes();
-    _searchController.addListener(() {
+   /* _searchController.addListener(() {
       _filterBookTypes();
-    });
+    });*/
   }
 
   Future<void> _fetchBookTypes() async {
@@ -70,10 +70,16 @@ class _ListBookTypeState extends State<ListBookType> {
               ),
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterBookTypes(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
+          ),
         ],
       ),
       body: FutureBuilder<List<BookType>>(
-        future: fetchBookType(), // Sử dụng hàm _fetchBookTypes() trực tiếp
+        future: fetchBookType(), // Sử dụng hàm
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -84,7 +90,7 @@ class _ListBookTypeState extends State<ListBookType> {
           } else {
             final bookTypesList = _filteredBookTypes.isNotEmpty
                 ? _filteredBookTypes
-                : _allBookTypes; // Sử dụng _allBookTypes thay vì snapshot.data!
+                : _allBookTypes; // Sử dụng _allBookTypes
             return ListView.builder(
               itemCount: bookTypesList.length,
               itemBuilder: (context, index) {

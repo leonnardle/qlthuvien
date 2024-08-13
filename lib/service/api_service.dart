@@ -17,15 +17,8 @@ class APIService{
       'Content-Type': 'application/json'
     };
 
-    String url;
-
-    if (kIsWeb) {
-      url = 'http://localhost:3000/user/login'; // Web
-    } else {
-      url = 'http://192.168.1.17:3000/user/login'; // Di động
-    }
-
-    var response = await client.post(Uri.parse(url), headers: requestHeader, body: jsonEncode(model.toJson()));
+    var response = await client.post(Uri.parse('${ConFig.apiUrl}/user/login')
+        , headers: requestHeader, body: jsonEncode(model.toJson()));
 
     if (response.statusCode == 200) {
       await ShareService.setLoginDetail(loginReponseJson(response.body));
@@ -43,6 +36,7 @@ class APIService{
     var reponse=await client.post(url,headers: requestHeader,body: jsonEncode(model.toJson()));
     return registerReponseModel(reponse.body);
   }
+/*
   static Future<String> getUserProfile () async {
     Map<String,String> requestHeader={
       'Content-Type':'application/json'
@@ -55,5 +49,6 @@ class APIService{
       return "";
     }
   }
+*/
 
 }

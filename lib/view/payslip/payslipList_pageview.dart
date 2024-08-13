@@ -51,9 +51,7 @@ class _ListPaySlipState extends State<ListPaySlip> {
     super.initState();
     //_booktypeFuture = fetchBookType();
     _fetchPaySlip();
-    _searchController.addListener(() {
-      _filterPaySlip();
-    });
+
   }
 
   @override
@@ -74,6 +72,12 @@ class _ListPaySlipState extends State<ListPaySlip> {
                 ),
               ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterPaySlip(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
           ),
         ],
 
@@ -245,6 +249,7 @@ class _ListPaySlipState extends State<ListPaySlip> {
                     } else {
                       paySlip.loanId = maphieumuonController.text;
                       paySlip.listBookIds = validBookIds;
+                      paySlip.payDay=DateTime.now();
                       bool result = await updatePaySlip(paySlip);
 
                       if (result && mounted) {

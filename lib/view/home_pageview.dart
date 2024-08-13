@@ -154,15 +154,13 @@ class NavBar extends StatelessWidget {
           ListTile(
             title: Text('Quản Lý Nhà Xuất Bản'),
             onTap: () async {
-              Future<List<Publisher>> publisherlist = fetchPublisher();
-              onItemSelected(ListPublisher(items: publisherlist,));
+              onItemSelected(ListPublisher());
             },
           ),
           ListTile(
             title: Text('Quản Lý Tác Giả'),
             onTap: () async {
-              Future<List<Author>> list =  fetchAuthor();
-              onItemSelected(ListAuthor(items: list));
+              onItemSelected(ListAuthor());
             },
           ),
           ListTile(

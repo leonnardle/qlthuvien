@@ -73,9 +73,6 @@ class _ListBookState extends State<ListBook> {
     super.initState();
     //_booksFuture = widget.booksFuture ?? fetchBooks();
     _fetchBook();
-    _searchController.addListener(() {
-      _filterBook();
-    });
     /*Timer.periodic(const Duration(minutes: 10), (timer) async {
       try {
         var books = await fetchBooks();
@@ -107,11 +104,17 @@ class _ListBookState extends State<ListBook> {
               child: TextField(
                 controller: _searchController,
                 decoration: const InputDecoration(
-                  hintText: 'Tìm kiếm theo tên loại...',
+                  hintText: 'Tìm kiếm theo mã sách...',
                   border: InputBorder.none,
                 ),
               ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterBook(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
           ),
         ],
 

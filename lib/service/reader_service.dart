@@ -19,7 +19,7 @@ Future<List<Reader>> fetchReader() async {
     throw Exception('unable connect to api');
   }
 }
-Future<void> insertReader(Reader reader) async {
+Future<bool> insertReader(Reader reader) async {
   try {
     final response = await http.post(Uri.parse('${ConFig.apiUrl}/docgia/'),
       headers: {
@@ -40,11 +40,14 @@ Future<void> insertReader(Reader reader) async {
 
     if (response.statusCode == 200) {
       print('Đã thêm doc gia thành công');
+      return true;
     } else {
       print('Đã xảy ra lỗi khi thêm docgia. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
+      return false;
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu thêm docgia: $e');
+    return false;
   }
 }
 Future<bool> updateReader(Reader reader) async {
@@ -55,7 +58,7 @@ Future<bool> updateReader(Reader reader) async {
         'Accept': 'application/json',
       },
       body: jsonEncode({
-        'mapm': "",
+        //'mapm': "",
         'tendocgia': reader.name,
         'email': reader.email,
         'sdt': reader.phoneNumber

@@ -122,7 +122,7 @@ Future<void> updateBook(Book book, List<String> manxbList,List<String> manloaiLi
 }
 Future<bool> deleteBook(String id) async {
   final response = await http.delete(
-    Uri.parse('http://localhost:3000/sach/$id'),
+    Uri.parse('${ConFig.apiUrl}/sach/$id'),
   );
 
   if (response.statusCode != 200) {

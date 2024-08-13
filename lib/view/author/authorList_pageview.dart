@@ -10,31 +10,79 @@ import '../../widget/deleteDialog.dart';
 import '../../widget/navbar.dart';
 
 class ListAuthor extends StatefulWidget {
-  late Future<List<Author>>? items;
 
-  ListAuthor({Key? key, this.items}) : super(key: key);
+  ListAuthor({Key? key}) : super(key: key);
 
   @override
   _ListAuthorState createState() => _ListAuthorState();
 }
 
 class _ListAuthorState extends State<ListAuthor> {
+  final TextEditingController _searchController = TextEditingController();
+  List<Author> _allAuthor = [];
+  List<Author> _filteredAuthor = [];
+  Future<void> _fetchAuthor() async {
+    try {
+      final bookTypes = await fetchAuthor();
+      setState(() {
+        _allAuthor = bookTypes;
+        _filteredAuthor = _searchController.text.isEmpty
+            ? bookTypes
+            : bookTypes.where((bookType) {
+          final nameLower = bookType.id.toLowerCase();
+          return nameLower.contains(_searchController.text.toLowerCase());
+        }).toList();
+      });
+    } catch (e) {
+      // Xử lý lỗi nếu cần
+    }
+  }
 
-/*  @override
+  void _filterAuthor() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      _filteredAuthor = _allAuthor.where((bookType) {
+        final nameLower = bookType.id.toLowerCase();
+        return nameLower.contains(query);
+      }).toList();
+    });
+  }
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    w = fetchAuthor();
-  }*/
+    _fetchAuthor();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // drawer: NavBar(),
       appBar: AppBar(
         title: const Text('Danh Sách Tác Giả'),
+        actions: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 300), // Optional: Constrain width
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Tìm kiếm theo ma...',
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterAuthor(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<Author>>(
-        future: widget.items,
+        future: fetchAuthor(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -43,15 +91,17 @@ class _ListAuthorState extends State<ListAuthor> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('Không có tacgia nao'));
           } else {
-            final authors = snapshot.data!;
+            final AuthorList = _filteredAuthor.isNotEmpty
+                ? _filteredAuthor
+                : _allAuthor; // Sử dụng _allBookTypes
             return Stack(
               children: [
                 Positioned.fill(
                   top: 50,
                   child: ListView.builder(
-                    itemCount: authors.length,
+                    itemCount: AuthorList.length,
                     itemBuilder: (context, index) {
-                      Author author = authors[index];
+                      Author author = AuthorList[index];
                       return GestureDetector(
                         child: Card(
                           margin: const EdgeInsets.symmetric(
@@ -107,7 +157,8 @@ class _ListAuthorState extends State<ListAuthor> {
                                       if (confirm) {
                                         final response = await deleteAuthor(author);
                                         if (response) {
-                                          _refreshAuthors();
+                                          await _fetchAuthor();
+                                          _filterAuthor();
                                         } else {
                                           print('đã xảy ra lỗi khi xóa tác giả với id : ${author.id}');
                                         }
@@ -142,7 +193,8 @@ class _ListAuthorState extends State<ListAuthor> {
             MaterialPageRoute(builder: (context) =>  AddAuthor()),
           );
           if(result!=null&&result==true){
-            _refreshAuthors();
+           await _fetchAuthor();
+            _filterAuthor();
           }
         },
       ),
@@ -250,7 +302,7 @@ class _ListAuthorState extends State<ListAuthor> {
                     await updateAuthor(author);
                     // Cập nhật danh sách tác giả
                     Navigator.of(context).pop();
-                    _refreshAuthors();
+                    _fetchAuthor();
                   },
                   child: Text('Cập Nhật'),
                 ),
@@ -261,10 +313,6 @@ class _ListAuthorState extends State<ListAuthor> {
       },
     );
   }
-  void _refreshAuthors() {
-    setState(() {
-      widget.items = fetchAuthor(); // Cập nhật Future để lấy dữ liệu mới
-    });
-  }
+
 
 }

@@ -56,6 +56,7 @@ Future<bool> insertPaySlip(PaySlip paySlip) async {
         "masachList":paySlip.listBookIds
       }),
     );
+    print(paySlip.payDay);
     /* print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/docgia/')}');
     print('Dữ liệu gửi đi: ${jsonEncode({'maloai': reader.id, 'tenloai': reader.loanId})}');
     print('Trạng thái phản hồi: ${response.statusCode}');
@@ -83,7 +84,7 @@ Future<bool> updatePaySlip(PaySlip paySlip) async {
       },
       body: jsonEncode({
         'maphieumuon': paySlip.loanId,
-        'ngaytra': paySlip.payDay.toIso8601String().split('T')[0], //format ngay
+        'ngaytra': paySlip.payDay.toIso8601String().split('T').join(' ').substring(0, 16),
         'ghichu': paySlip.note,
         "masachList":paySlip.listBookIds
       }),

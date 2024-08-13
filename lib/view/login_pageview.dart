@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
           }, (onSaved) {
             username = onSaved;
           },
-              initialValue: "trungquocle0507@gmail.com",
+              initialValue: "trungquocle636@gmail.com",
               borderFocusColor: Colors.white,
               borderColor: Colors.white,
               textColor: Colors.white,

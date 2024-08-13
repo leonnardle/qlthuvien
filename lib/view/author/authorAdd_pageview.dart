@@ -99,9 +99,6 @@ class _AddAuthorState extends State<AddAuthor> {
                   controller: _storyController,
                   decoration: InputDecoration(labelText: 'Tiểu Sử'),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Tiểu sử không được để trống';
-                    }
                     return null;
                   },
                 ),
@@ -109,9 +106,9 @@ class _AddAuthorState extends State<AddAuthor> {
                   controller: _emailController,
                   decoration: InputDecoration(labelText: 'Email'),
                   validator: (value) {
-                    if (value == null || value.isEmpty || !value.contains('@')) {
+                   /* if (value == null || value.isEmpty || !value.contains('@')) {
                       return 'Email không hợp lệ';
-                    }
+                    }*/
                     return null;
                   },
                 ),

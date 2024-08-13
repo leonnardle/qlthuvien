@@ -18,6 +18,7 @@ class Book {
   List<String> _listAuthorIds = [];
   List<Author> _authorList = [];
   int _trangthai = 1; // Thêm thuộc tính trạng thái
+  ImagePickerHelper _imagePickerHelper = ImagePickerHelper(); // Khởi tạo một lần
 
   String get id => _id;
   set id(String value) => _id = value;
@@ -81,17 +82,15 @@ class Book {
   }
 
   Future<void> pickImage() async {
-    final imagePickerHelper = ImagePickerHelper();
-    _image = await imagePickerHelper.pickImageFromGallery();
+    _image = await _imagePickerHelper .pickImageFromGallery();
     if (_image != null) {
       _imageBase64 = await getImageBase64();
     }
   }
 
   Future<String?> getImageBase64() async {
-    final imagePickerHelper = ImagePickerHelper();
     if (_image != null) {
-      return await imagePickerHelper.convertImageToBase64(_image!);
+      return await _imagePickerHelper .convertImageToBase64(_image!);
     }
     return null;
   }

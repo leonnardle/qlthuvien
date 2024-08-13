@@ -41,7 +41,7 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
           isAPIcallProcess = true;
         });
 
-        // Lấy danh sách ID sách từ input
+        // thêm dấu , để tách scsh rồi xóa khoảng trắng
         List<String> bookIds = _bookIdsController.text.split(',').map((line) => line.trim()).toList();
         bookIds.removeWhere((id) => id.isEmpty);
 

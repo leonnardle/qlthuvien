@@ -35,7 +35,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
   void initState() {
     super.initState();
     booksFuture = fetchBooks();
-    someFunction((reader) {
+    getReaderDetail((reader) {
       setState(() {
         currentReader = reader; // Cập nhật currentReader và gọi setState
       });

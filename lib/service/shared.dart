@@ -25,6 +25,7 @@ class ShareService {
     }
   }
 
+  // lấy thông tin chi tiết của người dùng khi đăng nhập
   static Future<LoginReponseModel?> loginDetails() async {
     try {
       if (kIsWeb) {
@@ -51,10 +52,11 @@ class ShareService {
     }
     return null;
   }
-  // khi đăng nhập thành công thì tạo biến cache đểluwuu nó
+  // tạo cache login_detail ể lưu thoogn tin dang nhap
   static Future<void> setLoginDetail(LoginReponseModel model) async {
 
     try {
+      // lấy data=>tạo key rồi chuyểndatdataa vô (phương thức setString)=>add cache
       final data = loginReponseToJson(model);
       if (kIsWeb) {
         final prefs = await SharedPreferences.getInstance();
@@ -85,7 +87,7 @@ class ShareService {
     }
   }
 }
-void someFunction(Function(Reader?) onReaderRetrieved) async {
+void getReaderDetail(Function(Reader?) onReaderRetrieved) async {
   try {
     LoginReponseModel? loginResponse = await ShareService.loginDetails();
 
@@ -94,7 +96,7 @@ void someFunction(Function(Reader?) onReaderRetrieved) async {
       onReaderRetrieved(reader);
     } else {
       print('No user is logged in');
-      onReaderRetrieved(null); // Có thể trả về null nếu không có người dùng đăng nhập
+      onReaderRetrieved(null); //  trả về null nếu không có người dùng đăng nhập
     }
   } catch (e) {
     print("Error retrieving login details: $e");

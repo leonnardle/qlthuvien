@@ -22,9 +22,7 @@ class _ListReaderState extends State<ListReader> {
   void initState() {
     super.initState();
     _fetchReaders();
-    _searchController.addListener(() {
-      _filterReaders();
-    });
+
   }
 
   Future<void> _fetchReaders() async {
@@ -67,6 +65,12 @@ class _ListReaderState extends State<ListReader> {
                 ),
               ),
             ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              _filterReaders(); // Gọi phương thức lọc khi nhấn nút tìm kiếm
+            },
           ),
         ],
       ),
