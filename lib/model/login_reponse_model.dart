@@ -41,15 +41,19 @@ class Data {
   String? password;
   String? role;
   Reader? reader;
-  Data({this.id, this.email, this.password, this.role,this.reader});
+
+  Data({this.id, this.email, this.password, this.role, this.reader});
 
   factory Data.fromJson(Map<String, dynamic> json) {
     return Data(
       id: json['id'],
       email: json['email'],
       password: json['password'],
-      role: json['role'], // Gán giá trị cho role
-      reader: json['reader'] != null ? Reader.fromJson(json['reader']) : null, // Gán giá trị cho reader
+      role: json['role'],
+      // Gán giá trị cho role
+      reader: json['reader'] != null
+          ? Reader.fromJson(json['reader'])
+          : null, // Gán giá trị cho reader
     );
   }
 

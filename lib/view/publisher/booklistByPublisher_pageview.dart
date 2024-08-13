@@ -17,9 +17,6 @@ class PublisherBooksPage extends StatefulWidget {
 
 class _PublisherBooksPageState extends State<PublisherBooksPage> {
   late Future<List<Book>> _booksFuture;
-
-
-
   @override
   void initState() {
     super.initState();

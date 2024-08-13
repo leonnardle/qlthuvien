@@ -122,9 +122,13 @@ class _AddReaderState extends State<AddReader> {
                     "email",
                     "email",
                         (onValiDate) {
-                      if (onValiDate.isEmpty) {
-                        return ("email không được để trống");
-                      }
+                          if (onValiDate!.isNotEmpty ) {
+                            if(!onValiDate!.contains('@')) {
+                              return 'Email không hợp lệ';
+                            }
+                          }else{
+                            return 'email không được để trống';
+                          }
                     },
                         (onSaved) {
                       email = onSaved;
@@ -141,16 +145,19 @@ class _AddReaderState extends State<AddReader> {
                     context,
                     "sdt",
                     "sdt",
-                        (onValidate) {
-                      if (onValidate.isEmpty) {
-                        return "Số điện thoại không được để trống";
-                      } else if (onValidate.length != 11) {
+                        (onValiDate) {
+                      if (onValiDate.isEmpty) {
+                        return 'Số điện thoại không được trống';
+                      } else if (onValiDate.length != 11) {
                         return "Số điện thoại phải có đúng 11 ký tự";
+                      } else if (!RegExp(r'^[0-9]+$').hasMatch(onValiDate)) {
+                        // Kiểm tra xem chuỗi chỉ chứa số
+                        return "Số điện thoại chỉ được chứa chữ số";
                       }
-                      return null; // Nếu hợp lệ, trả về null
+                      return null; // Không có lỗi
                     },
                         (onSaved) {
-                      sdt = onSaved;
+                      sdt = onSaved; // Lưu giá trị khi form được lưu
                     },
                     borderFocusColor: Colors.white,
                     borderColor: Colors.white,
@@ -158,7 +165,6 @@ class _AddReaderState extends State<AddReader> {
                     hintColor: Colors.black,
                     borderRadius: 10,
                     maxLength: 11,
-
                   ),
                   SizedBox(height: 10),
                   MyButton(
@@ -168,21 +174,6 @@ class _AddReaderState extends State<AddReader> {
                 ],
               ),
             )),
-          ),
-          Positioned(
-            top: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                'Thêm Loại Sách',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                  color: Colors.yellow[700],
-                ),
-              ),
-            ),
           ),
         ],
       ),

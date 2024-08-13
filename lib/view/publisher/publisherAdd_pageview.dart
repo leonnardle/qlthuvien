@@ -103,9 +103,8 @@ class _AddPublisherState extends State<AddPublisher> {
                       borderColor: Colors.white,
                       textColor: Colors.black,
                       hintColor: Colors.black,
-                      maxLength: 50,
+                      maxLength: 100,
                       borderRadius: 10,
-
                     ),
                     SizedBox(height: 10),
                     Text('dia chi'),
@@ -126,7 +125,7 @@ class _AddPublisherState extends State<AddPublisher> {
                       borderColor: Colors.white,
                       textColor: Colors.black,
                       hintColor: Colors.black,
-
+                      maxLength: 255,
                       borderRadius: 10,
                     ),
                     SizedBox(height: 10),
@@ -134,20 +133,20 @@ class _AddPublisherState extends State<AddPublisher> {
 
                     FormHelper.inputFieldWidget(
                       context,
-                      " sdt",
+                      "sdt",
                       "sdt",
                           (onValiDate) {
-                            if(onValiDate.isEmpty){
-                              return('sdt không được trống');
-                            }else{
-                              if(onValiDate.length != 11){
-                                return "Số điện thoại phải có đúng 11 ký tự";
-                              }
-                              return null;
-                            }
-                          },
+                        if (onValiDate.isEmpty) {
+                          return 'Số điện thoại không được trống';
+                        } else if (onValiDate.length != 11) {
+                          return "Số điện thoại phải có đúng 11 ký tự";
+                        } else if (!RegExp(r'^[0-9]+$').hasMatch(onValiDate)) {
+                          return "Số điện thoại chỉ được chứa chữ số";
+                        }
+                        return null; // Không có lỗi
+                      },
                           (onSaved) {
-                        sdt = onSaved;
+                        sdt = onSaved; // Lưu giá trị khi form được lưu
                       },
                       borderFocusColor: Colors.white,
                       borderColor: Colors.white,
@@ -155,8 +154,7 @@ class _AddPublisherState extends State<AddPublisher> {
                       hintColor: Colors.black,
                       borderRadius: 10,
                       maxLength: 11,
-                      isNumeric: true
-
+                      isNumeric: true, // Chỉ cho phép nhập số
                     ),
                     SizedBox(height: 10),
                     MyButton(onTap: addNhaxuatban, text: 'them nxb',),

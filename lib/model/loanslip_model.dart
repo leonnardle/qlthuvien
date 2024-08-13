@@ -1,6 +1,5 @@
-
 import 'package:luanvan/model/book_model.dart';
-import 'package:intl/intl.dart';  // Để sử dụng định dạng ngày tháng
+import 'package:intl/intl.dart'; // Để sử dụng định dạng ngày tháng
 
 class LoanSlip {
   String _id = '';

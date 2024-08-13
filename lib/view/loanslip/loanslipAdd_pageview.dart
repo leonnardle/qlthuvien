@@ -66,7 +66,7 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
             ));
           } else {
             // Kiểm tra phiếu mượn chưa trả
-            final response = await http.get(Uri.parse('http://192.168.1.17:3000/phieumuon/check/$madocgia'));
+            final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/check/$madocgia'));
 
             if (response.statusCode == 200) {
               final List<dynamic> data = json.decode(response.body);
@@ -215,7 +215,7 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
                     textColor: Colors.black,
                     hintColor: Colors.black,
                     borderRadius: 10,
-                    initialValue: "dg1"
+                    maxLength: 10
                   ),
                   SizedBox(height: 10),
                   Text('ma sach'),
@@ -236,7 +236,6 @@ class _AddLoanSlipState extends State<AddLoanSlip> {
                     textColor: Colors.black,
                     hintColor: Colors.black,
                     borderRadius: 10,
-                    initialValue: "6,f"
                   ),
                   SizedBox(height: 10),
                   MyButton(

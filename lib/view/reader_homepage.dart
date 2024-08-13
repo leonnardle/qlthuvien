@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:luanvan/config.dart';
 import 'package:luanvan/model/book_model.dart';
 import 'package:luanvan/service/book_service.dart';
 import 'package:luanvan/service/shared.dart';
@@ -96,7 +97,7 @@ class _CustomerHomePageState extends State<CustomerHomePage> {
     String ngaymuon = DateTime.now().toIso8601String();
 
     final response = await http.post(
-      Uri.parse('http://192.168.1.17:3000/phieumuondangchoduyet'),
+      Uri.parse('${ConFig.apiUrl}/phieumuondangchoduyet'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'madocgia': currentReader?.id,

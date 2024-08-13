@@ -28,7 +28,7 @@ class _AddAuthorState extends State<AddAuthor> {
   Future<void> _saveAuthor() async {
     if (_addAuthorKey.currentState?.validate() ?? false) {
       setState(() {
-        _isLoading = true; // Bắt đầu tải
+        _isLoading = true;
       });
 
       final author = Author()
@@ -77,23 +77,23 @@ class _AddAuthorState extends State<AddAuthor> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Tên Tác Giả'),
+                  decoration: InputDecoration(labelText: 'Tên Tác Giả',),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Tên tác giả không được để trống';
                     }
                     return null;
                   },
+                  maxLength: 100,
                 ),
                 TextFormField(
                   controller: _countryController,
                   decoration: InputDecoration(labelText: 'Quốc Tịch'),
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Quốc tịch không được để trống';
-                    }
+
                     return null;
                   },
+                  maxLength: 56,
                 ),
                 TextFormField(
                   controller: _storyController,
@@ -106,9 +106,11 @@ class _AddAuthorState extends State<AddAuthor> {
                   controller: _emailController,
                   decoration: InputDecoration(labelText: 'Email'),
                   validator: (value) {
-                   /* if (value == null || value.isEmpty || !value.contains('@')) {
-                      return 'Email không hợp lệ';
-                    }*/
+                    if (value!.isNotEmpty ) {
+                      if(!value!.contains('@')) {
+                        return 'Email không hợp lệ';
+                      }
+                    }
                     return null;
                   },
                 ),

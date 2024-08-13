@@ -52,7 +52,7 @@ class _ListBookState extends State<ListBook> {
     setState(() {
       _filteredBook = _allBookTypes.where((bookType) {
         final nameLower = bookType.id.toLowerCase();
-        return nameLower.contains(query);
+        return nameLower.contains(query); // nếu true thì thêm kết quả vào danh sách
       }).toList();
     });
   }  // dung de nap danh sach lan dau khi tai len

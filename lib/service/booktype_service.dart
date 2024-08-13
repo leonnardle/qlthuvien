@@ -18,6 +18,7 @@ Future<List<BookType>> fetchBookType() async {
     throw Exception('unable connect to api');
   }
 }
+
 Future<void> insertBooktype(BookType booktype) async {
   try {
     final response = await http.post(
@@ -39,24 +40,23 @@ Future<void> insertBooktype(BookType booktype) async {
     if (response.statusCode == 200) {
       print('Đã thêm loại sách thành công');
     } else {
-      print('Đã xảy ra lỗi khi thêm loại sách. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
+      print(
+          'Đã xảy ra lỗi khi thêm loại sách. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu thêm loại sách: $e');
   }
 }
+
 Future<void> updateBooktype(BookType book) async {
   try {
-    final response =  await http.put(
-        Uri.parse('${ConFig.apiUrl}/booktype/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-        'maloai': book.id,
-        'tenloai': book.name
-      }),
+    final response = await http.put(
+      Uri.parse('${ConFig.apiUrl}/booktype/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: jsonEncode({'maloai': book.id, 'tenloai': book.name}),
     );
 /*    print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/booktype/')}');
     print('Dữ liệu gửi đi: ${jsonEncode({'maloai': book.id, 'tenloai': book.name})}');
@@ -71,12 +71,12 @@ Future<void> updateBooktype(BookType book) async {
     print('Đã xảy ra lỗi khi gửi yêu cầu cập nhật loại sách: $e');
   }
 }
+
 Future<bool> deleteBooktype(BookType book) async {
   try {
-    final response =  await http.delete(
+    final response = await http.delete(
         Uri.parse('${ConFig.apiUrl}/booktype/${book.id}'),
-        headers: {"Accept": "application/json"}
-    );
+        headers: {"Accept": "application/json"});
 
 /*    print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/booktype/')}');
     print('Dữ liệu gửi đi: ${jsonEncode({'maloai': book.id})}');
@@ -86,16 +86,12 @@ Future<bool> deleteBooktype(BookType book) async {
     if (response.statusCode == 200) {
       print('Đã xóa loại sách thành công');
       return true;
-
     } else {
       print('Đã xảy ra lỗi khi xóa loại sách cho ${book.id}');
       return false;
-
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu xóa loại sách: $e');
     return false;
-
   }
 }
-

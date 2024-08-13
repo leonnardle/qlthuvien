@@ -101,6 +101,7 @@ class _AddBookTypeState extends State<AddBookType> {
                       hintColor: Colors.black,
                       maxLength: 10,
                       borderRadius: 10),
+
                   SizedBox(height: 10),
                   Text('tên loại'),
                   FormHelper.inputFieldWidget(

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
 import 'package:luanvan/config.dart';
 import 'package:luanvan/model/login_reponse_model.dart';
 import 'package:luanvan/model/login_request_model.dart';
@@ -9,16 +9,15 @@ import 'package:luanvan/model/register_request_model.dart';
 import 'package:luanvan/model/register_response_model.dart';
 import 'package:luanvan/service/shared.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-class APIService{
-  static var client=http.Client();
+
+class APIService {
+  static var client = http.Client();
 
   static Future<LoginReponseModel> login(LoginRequestModel model) async {
-    Map<String, String> requestHeader = {
-      'Content-Type': 'application/json'
-    };
+    Map<String, String> requestHeader = {'Content-Type': 'application/json'};
 
-    var response = await client.post(Uri.parse('${ConFig.apiUrl}/user/login')
-        , headers: requestHeader, body: jsonEncode(model.toJson()));
+    var response = await client.post(Uri.parse('${ConFig.apiUrl}/user/login'),
+        headers: requestHeader, body: jsonEncode(model.toJson()));
 
     if (response.statusCode == 200) {
       await ShareService.setLoginDetail(loginReponseJson(response.body));
@@ -28,12 +27,11 @@ class APIService{
     }
   }
 
-  static Future<RegisterReponseModel> register(RegisterRequestModel model) async {
-    Map<String,String> requestHeader={
-      'Content-Type':'application/json'
-    };
-    var url=Uri.http(ConFig.apiUrl,ConFig.registerAPI);
-    var reponse=await client.post(url,headers: requestHeader,body: jsonEncode(model.toJson()));
+  static Future<RegisterReponseModel> register(
+      RegisterRequestModel model) async {
+    Map<String, String> requestHeader = {'Content-Type': 'application/json'};
+    var reponse = await client.post(Uri.parse('${ConFig.apiUrl}/user/register'),
+        headers: requestHeader, body: jsonEncode(model.toJson()));
     return registerReponseModel(reponse.body);
   }
 /*
@@ -50,5 +48,4 @@ class APIService{
     }
   }
 */
-
 }

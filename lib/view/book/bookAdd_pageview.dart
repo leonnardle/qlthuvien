@@ -136,7 +136,7 @@ class _AddBookState extends State<AddBook> {
         context: context,
         builder: (context) {
           return MultiSelectDialog(
-            items: _publishers.map((p) => MultiSelectItem(p, p.id)).toList(),
+            items: _publishers.map((p) => MultiSelectItem(p, p.name)).toList(),
             initialValue: _selectedPublishers,
             title: Text('Chọn Nhà Xuất Bản'),
             onConfirm: (values) {
@@ -164,7 +164,7 @@ class _AddBookState extends State<AddBook> {
         context: context,
         builder: (context) {
           return MultiSelectDialog(
-            items: _bookType.map((p) => MultiSelectItem(p, p.id)).toList(),
+            items: _bookType.map((p) => MultiSelectItem(p, p.name)).toList(),
             initialValue: _selectedBooktype,
             title: Text('Chọn ma loai'),
             onConfirm: (values) {
@@ -250,7 +250,7 @@ class _AddBookState extends State<AddBook> {
                       border: OutlineInputBorder(),
                     ),
                     child: Text(_selectedAuthor.isEmpty
-                        ? 'Chưa chọn mã tác giả'
+                        ? 'Chưa chọn tác giả'
                         : _selectedAuthor.map((p) => p.name).join(', ')),
                   ),
                 ),

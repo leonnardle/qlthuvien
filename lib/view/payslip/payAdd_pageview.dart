@@ -151,6 +151,7 @@ class _AddPaySlipState extends State<AddPaySlip> {
                       textColor: Colors.black,
                       hintColor: Colors.black,
                       borderRadius: 10,
+                      maxLength: 11
                   ),
                   SizedBox(height: 10),
                   Text('ma sach'),
@@ -189,6 +190,7 @@ class _AddPaySlipState extends State<AddPaySlip> {
                     textColor: Colors.black,
                     hintColor: Colors.black,
                     borderRadius: 10,
+
                   ),
                   SizedBox(height: 10),
                   MyButton(

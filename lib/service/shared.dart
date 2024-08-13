@@ -21,7 +21,6 @@ class ShareService {
     } catch (e) {
       print("Error checking cache key existence: $e");
       return false;
-
     }
   }
 
@@ -39,12 +38,15 @@ class ShareService {
           return LoginReponseModel.fromJson(decodedData);
         }
       } else {
-        var isKeyExist = await APICacheManager().isAPICacheKeyExist("login_detail");
+        var isKeyExist =
+            await APICacheManager().isAPICacheKeyExist("login_detail");
         if (isKeyExist) {
           var cacheData = await APICacheManager().getCacheData("login_detail");
-          final decodedData = jsonDecode(cacheData.syncData) as Map<String, dynamic>;
+          final decodedData =
+              jsonDecode(cacheData.syncData) as Map<String, dynamic>;
           print('Decoded data: $decodedData');
-          return LoginReponseModel.fromJson(decodedData); // Chuyển đổi JSON thành đối tượng
+          return LoginReponseModel.fromJson(
+              decodedData); // Chuyển đổi JSON thành đối tượng
         }
       }
     } catch (e) {
@@ -52,9 +54,9 @@ class ShareService {
     }
     return null;
   }
+
   // tạo cache login_detail ể lưu thoogn tin dang nhap
   static Future<void> setLoginDetail(LoginReponseModel model) async {
-
     try {
       // lấy data=>tạo key rồi chuyểndatdataa vô (phương thức setString)=>add cache
       final data = loginReponseToJson(model);
@@ -62,9 +64,8 @@ class ShareService {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('login_detail', data);
       } else {
-        APICacheDBModel cacheDbModel = APICacheDBModel(
-            key: 'login_detail', syncData: data
-        );
+        APICacheDBModel cacheDbModel =
+            APICacheDBModel(key: 'login_detail', syncData: data);
         await APICacheManager().addCacheData(cacheDbModel);
       }
     } catch (e) {
@@ -76,17 +77,28 @@ class ShareService {
     try {
       if (kIsWeb) {
         final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('login_detail'); // Xóa dữ liệu khỏi SharedPreferences
-        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
+        await prefs
+            .remove('login_detail'); // Xóa dữ liệu khỏi SharedPreferences
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginPage(),
+            ));
       } else {
-        await APICacheManager().deleteCache("login_detail"); // Xóa dữ liệu khỏi cache
-        Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
+        await APICacheManager()
+            .deleteCache("login_detail"); // Xóa dữ liệu khỏi cache
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LoginPage(),
+            ));
       }
     } catch (e) {
       print("Error logging out and clearing cache: $e");
     }
   }
 }
+
 void getReaderDetail(Function(Reader?) onReaderRetrieved) async {
   try {
     LoginReponseModel? loginResponse = await ShareService.loginDetails();
@@ -103,4 +115,3 @@ void getReaderDetail(Function(Reader?) onReaderRetrieved) async {
     onReaderRetrieved(null); // Trả về null trong trường hợp lỗi
   }
 }
-

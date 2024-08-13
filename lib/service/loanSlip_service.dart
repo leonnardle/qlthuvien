@@ -15,21 +15,23 @@ List<LoanSlip> parseLoanslip(String responseBody) {
 Future<List<LoanSlip>> fetchLoanslip() async {
   try {
     final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/'));
-    List<LoanSlip>list = parseLoanslip(response.body);
+    List<LoanSlip> list = parseLoanslip(response.body);
     if (response.statusCode == 200) {
       // tien hanh nap sach cho tung phieu muon
       final future = list.map((loanslip) async {
-        try{
-        final bookresponse = await http.get(
-            Uri.parse('${ConFig.apiUrl}/phieumuon/${loanslip.id}/danhsachsach'));
-        if (bookresponse.statusCode == 200) {
-          final bookTypeData = jsonDecode(bookresponse.body)['data'];
-          if (bookTypeData != null && bookTypeData is List) {
-            loanslip.bookList = bookTypeData.map((p) => Book.fromJson(p)).toList();
-          } else {
-            print('Chưa có sach cho id: ${loanslip.id}');
+        try {
+          final bookresponse = await http.get(Uri.parse(
+              '${ConFig.apiUrl}/phieumuon/${loanslip.id}/danhsachsach'));
+          if (bookresponse.statusCode == 200) {
+            final bookTypeData = jsonDecode(bookresponse.body)['data'];
+            if (bookTypeData != null && bookTypeData is List) {
+              loanslip.bookList =
+                  bookTypeData.map((p) => Book.fromJson(p)).toList();
+            } else {
+              print('Chưa có sach cho id: ${loanslip.id}');
+            }
           }
-        }}catch(error){
+        } catch (error) {
           // neu loi thi cho list do la rong
           print('loi khi nap thong tin cho phieu muon ${loanslip.id}');
           loanslip.bookList = [];
@@ -40,22 +42,28 @@ Future<List<LoanSlip>> fetchLoanslip() async {
     } else {
       throw Exception('unable connect to api');
     }
-  }catch(error){
+  } catch (error) {
     rethrow;
   }
 }
+
 Future<void> insertLoanslip(LoanSlip loanSlip) async {
   try {
-    final response = await http.post(Uri.parse('${ConFig.apiUrl}/phieumuon/'),
+    final response = await http.post(
+      Uri.parse('${ConFig.apiUrl}/phieumuon/'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
       body: jsonEncode({
         'madocgia': loanSlip.readerId,
-        'ngaymuon': loanSlip.loanDay.toIso8601String().split('T').join(' ').substring(0, 16), // format ngày và giờ
+        'ngaymuon': loanSlip.loanDay
+            .toIso8601String()
+            .split('T')
+            .join(' ')
+            .substring(0, 16), // format ngày và giờ
         'trangthai': loanSlip.status,
-        "masachList":loanSlip.listBookIds
+        "masachList": loanSlip.listBookIds
       }),
     );
     /* print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/docgia/')}');
@@ -65,15 +73,18 @@ Future<void> insertLoanslip(LoanSlip loanSlip) async {
     if (response.statusCode == 200) {
       print('Đã thêm phieu muon thành công');
     } else {
-      print('Đã xảy ra lỗi khi thêm phieu muon. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
+      print(
+          'Đã xảy ra lỗi khi thêm phieu muon. Mã lỗi: ${response.statusCode}, Nội dung: ${response.body}');
     }
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu thêm phieu muon: $e');
   }
 }
+
 Future<bool> updateLoanslip(LoanSlip loanSlip) async {
   try {
-    final response = await http.put(Uri.parse('${ConFig.apiUrl}/phieumuon/${loanSlip.id}'),
+    final response = await http.put(
+      Uri.parse('${ConFig.apiUrl}/phieumuon/${loanSlip.id}'),
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -100,14 +111,13 @@ Future<bool> updateLoanslip(LoanSlip loanSlip) async {
     print('Đã xảy ra lỗi khi gửi yêu cầu cập cho phieu muon: $e');
   }
   return false;
-
 }
+
 Future<bool> deleteLoanslip(LoanSlip book) async {
   try {
-    final response =  await http.delete(
+    final response = await http.delete(
         Uri.parse('${ConFig.apiUrl}/phieumuon/${book.id}'),
-        headers: {"Accept": "application/json"}
-    );
+        headers: {"Accept": "application/json"});
 /*    print('Yêu cầu gửi đi: ${Uri.parse('${ConFig.apiUrl}/Reader/')}');
     print('Dữ liệu gửi đi: ${jsonEncode({'maloai': book.id})}');
     print('Trạng thái phản hồi: ${response.statusCode}');
@@ -115,18 +125,16 @@ Future<bool> deleteLoanslip(LoanSlip book) async {
 
     if (response.statusCode == 200) {
       return true;
-    }else{
-
-    }
+    } else {}
   } catch (e) {
-
     return false;
   }
   return false;
 }
 
 Future<bool> checkLoanSlipExists(String loanIds) async {
-  final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/$loanIds'));
+  final response =
+      await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/$loanIds'));
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
     return data['success'];
@@ -134,8 +142,10 @@ Future<bool> checkLoanSlipExists(String loanIds) async {
     return false;
   }
 }
+
 Future<List<Book>> fetchBooksByLoanSlip(String publisherId) async {
-  final response = await http.get(Uri.parse('${ConFig.apiUrl}/phieumuon/${publisherId}/danhsachsach'));
+  final response = await http
+      .get(Uri.parse('${ConFig.apiUrl}/phieumuon/${publisherId}/danhsachsach'));
   if (response.statusCode == 200) {
     return parseBook(response.body);
   } else {

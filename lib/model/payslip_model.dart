@@ -1,6 +1,5 @@
-
 import 'package:luanvan/model/book_model.dart';
-import 'package:intl/intl.dart';  // Để sử dụng định dạng ngày tháng
+import 'package:intl/intl.dart'; // Để sử dụng định dạng ngày tháng
 
 class PaySlip {
   String _id = '';
@@ -10,6 +9,7 @@ class PaySlip {
   DateTime _payDay = DateTime.now();
   List<String> _listBookIds = [];
   List<Book> _bookList = [];
+
   List<String> get listBookIds => _listBookIds;
 
   set listBookIds(List<String> value) {
@@ -21,7 +21,6 @@ class PaySlip {
   set id(String value) {
     _id = value;
   }
-
 
   String get note => _note;
 
@@ -74,8 +73,4 @@ class PaySlip {
 
     return loanSlip;
   }
-
-
-
-
 }

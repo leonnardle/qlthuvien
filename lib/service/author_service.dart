@@ -19,10 +19,10 @@ Future<List<Author>> fetchAuthor() async {
     throw Exception('unable connect to api');
   }
 }
-Future<Map<String, dynamic>?> insertAuthor(Author author) async {
 
+Future<Map<String, dynamic>?> insertAuthor(Author author) async {
   final response = await http.post(
-    Uri.parse('${ConFig.apiUrl}/tacgia/'),  // Thay đổi URL nếu cần
+    Uri.parse('${ConFig.apiUrl}/tacgia/'), // Thay đổi URL nếu cần
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
@@ -42,17 +42,16 @@ Future<Map<String, dynamic>?> insertAuthor(Author author) async {
     throw Exception('Failed to add author');
   }
 }
+
 Future<bool> deleteAuthor(Author author) async {
   try {
-    final response =  await http.delete(
+    final response = await http.delete(
         Uri.parse('${ConFig.apiUrl}/tacgia/${author.id}'),
-        headers: {"Accept": "application/json"}
-    );
+        headers: {"Accept": "application/json"});
 
     if (response.statusCode == 200) {
       print('Đã xóa tác giả thành công');
       return true;
-
     } else {
       print('Đã xảy ra lỗi khi  xóa tác giả cho ${author.id}');
       return false;
@@ -60,14 +59,14 @@ Future<bool> deleteAuthor(Author author) async {
   } catch (e) {
     print('Đã xảy ra lỗi khi gửi yêu cầu xóa loại sách: $e');
     return false;
-
   }
-
 }
+
 Future<bool> updateAuthor(Author author) async {
-  try{
+  try {
     final response = await http.put(
-      Uri.parse('http://192.168.1.17:3000/tacgia/${author.id}'),  // Thay đổi URL nếu cần
+      Uri.parse('${ConFig.apiUrl}/tacgia/${author.id}'),
+      // Thay đổi URL nếu cần
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -87,9 +86,7 @@ Future<bool> updateAuthor(Author author) async {
     } else {
       return false;
     }
-  }
-  catch(error){
+  } catch (error) {
     throw Exception('Failed to update author');
   }
 }
-
